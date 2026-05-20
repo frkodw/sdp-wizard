@@ -1,0 +1,207 @@
+{
+  "overviewLink": {
+    "label": "SDP process overview",
+    "href": "https://docs.trifork.com/pages/resumedraft.action?draftId=51195398&draftShareId=550ea4f9-5dfc-46fa-ab4a-cf9f6e7f5cb2&"
+  },
+  "vpnNote": "To access the linked pages, make sure you are on Trifork's network or connected via Trifork VPN.",
+
+  "phases": [
+    {
+      "id": "before-contract",
+      "title": "Before contract signing",
+      "responsible": "Team Lead",
+      "intro": "Work through these decisions to identify the documents and agreements you need before signing.",
+      "steps": [
+        {
+          "id": "data-type",
+          "question": "What types of data is the project about to process?",
+          "context": "\"Processing\" means anything done to or with data, including collection, recording, storage, use, disclosure, and erasure. Tick every category that applies.",
+          "type": "multi",
+          "options": [
+            { "value": "anonymous", "label": "Anonymous / public", "hint": "Publicly available info, fully anonymised data, synthetic/dummy data." },
+            { "value": "internal", "label": "Internal", "hint": "Internal docs, code, processes, templates, policies." },
+            { "value": "customer", "label": "Customer / project (under NDA)", "hint": "Customer code, designs, requirements, anything under contract or NDA." },
+            { "value": "personal-non-sensitive", "label": "Non-sensitive personal data", "hint": "Name, address, email, phone, age, education, IP address." },
+            { "value": "sensitive", "label": "Sensitive personal data or secrets", "hint": "CPR, health, biometrics, salary/finance, HR cases, passwords, tokens, certificates, vulnerability details, production datasets." }
+          ]
+        },
+        {
+          "id": "project-category-set",
+          "question": "Have you classified the project in Duckwise Project Categories?",
+          "context": "Each project type has its own classification and assessment files. Set the category before continuing so the right templates are used.",
+          "type": "yesno",
+          "options": [
+            { "value": "yes", "label": "Yes" },
+            { "value": "no", "label": "Not yet" }
+          ]
+        },
+        {
+          "id": "ai-tools",
+          "question": "Will the project use any AI tools?",
+          "context": "If AI tools are used the client must sign the Aftale om brug af hjælpeværktøjer (Helper tools agreement). The specific tool names go in the agreement itself, not here.",
+          "type": "yesno",
+          "options": [
+            { "value": "yes", "label": "Yes" },
+            { "value": "no", "label": "No" }
+          ]
+        },
+        {
+          "id": "controller-role",
+          "question": "Who is the data controller for this project?",
+          "context": "Controller decides why and how personal data is used. Processor handles the data on the controller's instructions. Sub-processor is a vendor used by a processor (no matter how far down the chain, the term stays \"sub-processor\"). Example A: Client controller → Trifork processor → Duckwise sub-processor → Company X sub-processor.",
+          "type": "single",
+          "options": [
+            { "value": "client-controller", "label": "Client is controller" },
+            { "value": "trifork-controller", "label": "Trifork is controller" },
+            { "value": "duckwise-controller", "label": "Duckwise is controller" },
+            { "value": "client-refuses", "label": "Client refuses to be controller" }
+          ]
+        },
+        {
+          "id": "dpa-needed",
+          "question": "Is a Data Processor Agreement (DPA) needed?",
+          "context": "A DPA is needed between every pair of parties that exchanges personal data. The main DPA (controller ↔ processor) must list all sub-processors downstream.",
+          "type": "yesno",
+          "options": [
+            { "value": "yes", "label": "Yes" },
+            { "value": "no", "label": "No" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "before-project-start",
+      "title": "Before project start",
+      "responsible": "Project Lead",
+      "intro": "Confirm tool levels, handbook reading, and consents before the team begins work.",
+      "steps": [
+        {
+          "id": "team-signoff",
+          "question": "Have all team members signed the annual cycle signoff?",
+          "context": "Section 3 \"Team member signoff\" on the DK-AAR/CPH-DUCKS Annual cycle BU page must be signed by every team member before they touch the project.",
+          "type": "yesno",
+          "options": [
+            { "value": "yes", "label": "Yes" },
+            { "value": "no", "label": "Not yet" }
+          ]
+        },
+        {
+          "id": "tools-listed",
+          "question": "Are all tools the team will use listed on the Duckwise systems Level 1/2/3 lists?",
+          "context": "Each system must be on the correct level, with the level of data processing allowed matching the project's tasks. Client-provided accounts (non-duckwise.dk/trifork.com emails) go on Level 3.",
+          "type": "yesno",
+          "options": [
+            { "value": "yes", "label": "Yes" },
+            { "value": "no", "label": "Not yet" }
+          ]
+        },
+        {
+          "id": "handbooks-read",
+          "question": "Have all team members read the handbooks for the tools being used?",
+          "context": "If any handbook is listed for a system, every team member must read and understand it before using the system.",
+          "type": "yesno",
+          "options": [
+            { "value": "yes", "label": "Yes" },
+            { "value": "no", "label": "Not yet" }
+          ]
+        },
+        {
+          "id": "consents-needed",
+          "question": "Will the project process personal data that requires consent?",
+          "context": "If personal data is processed, consent must be in place before processing starts. The data controller obtains and stores consent. Consent can be digital but must be demonstrable in writing.",
+          "type": "yesno",
+          "options": [
+            { "value": "yes", "label": "Yes" },
+            { "value": "no", "label": "No" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "during-project",
+      "title": "During the project",
+      "responsible": "Project Lead",
+      "intro": "Once a month, check whether anything has changed that would require updating Article 30.",
+      "steps": [
+        {
+          "id": "changes-affect-article-30",
+          "question": "Has anything changed this month that affects Article 30?",
+          "context": "New tools, new data types, new sub-processors, or scope changes can require amending Article 30.",
+          "type": "yesno",
+          "options": [
+            { "value": "yes", "label": "Yes" },
+            { "value": "no", "label": "No" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "at-project-finish",
+      "title": "At project finish",
+      "responsible": "Project Lead",
+      "intro": "Close out Article 30 and verify deletion obligations defined in consents and DPAs are met.",
+      "steps": [
+        {
+          "id": "finish-changes",
+          "question": "Did anything change at project end that affects Article 30?",
+          "context": "Final scope or data movement may require a last amendment before marking the project completed.",
+          "type": "yesno",
+          "options": [
+            { "value": "yes", "label": "Yes" },
+            { "value": "no", "label": "No" }
+          ]
+        },
+        {
+          "id": "deletion-done",
+          "question": "Has all data that must be deleted actually been deleted?",
+          "context": "Consents and DPAs define what must be deleted and when. Verify deletion is complete before marking the project closed.",
+          "type": "yesno",
+          "options": [
+            { "value": "yes", "label": "Yes" },
+            { "value": "no", "label": "Not yet" }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "actions": [
+    { "id": "start-article-30-row", "title": "Start a new project row in Duckwise Article 30", "destination": "Article 30", "link": { "label": "Duckwise Article 30", "href": "https://docs.trifork.com/display/TSDP/Duckwise+Article+30" }, "note": "Open the Article 30 register and add a new row for this project." },
+    { "id": "fill-classification-files", "title": "Fill in the classification & assessment files for the project category", "destination": "Article 30", "link": { "label": "Duckwise Project Categories", "href": "https://docs.trifork.com/display/TSDP/Duckwise+Project+Categories" }, "note": "Use the templates that match the chosen project category." },
+    { "id": "contact-sdp-agent-sensitive", "title": "Contact your SDP agent before proceeding. The project will process sensitive data or secrets.", "destination": "Escalation", "link": null, "note": "Sensitive data and secrets require SDP agent involvement before contract signing." },
+    { "id": "fill-ai-tools-agreement", "title": "Have the client sign the Aftale om brug af hjælpeværktøjer (Helper tools agreement)", "destination": "Agreements", "link": { "label": "Aftale om brug af hjælpeværktøjer", "href": "https://docs.trifork.com/pages/viewpage.action?pageId=225582317" }, "note": "Fill in the tools list, get client signature, upload to Article 30." },
+    { "id": "create-dpa", "title": "Create the Data Processor Agreement using the DBA Trifork template", "destination": "DPA", "link": { "label": "Data Processing Agreement", "href": "https://docs.trifork.com/display/TSDP/Date+Processing+Agreement" }, "note": "Make sure the relationship between controller, processor, and any sub-processors is described, including which systems Duckwise uses and whether they process data outside the EU or outside the US data privacy framework." },
+    { "id": "contact-sdp-agent-controller-refused", "title": "Contact your SDP agent. The client is unwilling to figure as data controller.", "destination": "Escalation", "link": null, "note": "If a DPA is needed AND the client refuses the controller role, this must be escalated before continuing." },
+    { "id": "set-project-category", "title": "Classify the project in Duckwise Project Categories", "destination": "Article 30", "link": { "label": "Duckwise Project Categories", "href": "https://docs.trifork.com/display/TSDP/Duckwise+Project+Categories" }, "note": "Set the category so the right classification and assessment files apply." },
+    { "id": "team-signoff-row", "title": "Sign Section 3 (Team member signoff) on the annual cycle BU page", "destination": "Team signoff", "link": { "label": "Annual cycles (BU level)", "href": "https://docs.trifork.com/display/TSDP/Annual+cycles+-+BU+level" }, "note": "Every team member signs before touching the project." },
+    { "id": "list-tools-on-levels", "title": "Add or update each tool on the correct Duckwise systems level (1/2/3)", "destination": "Duckwise systems", "link": { "label": "Duckwise systems", "href": "https://docs.trifork.com/display/TSDP/DK-AAR-DUCKS%2C+DK-AAL-DUCKS+and+DK-CPH-DUCKS%3A+Duckwise+systems" }, "note": "Match the level of data processing allowed to the project's tasks." },
+    { "id": "read-system-handbooks", "title": "Read the handbooks for every system the team will use", "destination": "Team prep", "link": null, "note": "If a system has a handbook listed, every team member must read it before use." },
+    { "id": "list-client-accounts-level-3", "title": "List any client-licensed accounts on the Duckwise systems Level 3 list", "destination": "Duckwise systems", "link": { "label": "Duckwise systems", "href": "https://docs.trifork.com/display/TSDP/DK-AAR-DUCKS%2C+DK-AAL-DUCKS+and+DK-CPH-DUCKS%3A+Duckwise+systems" }, "note": "Accounts not using duckwise.dk or trifork.com emails belong on Level 3." },
+    { "id": "draft-consent", "title": "Draft the consent form. Use the client's template if they have one, otherwise the Trifork Consent template.", "destination": "Consents", "link": { "label": "Consent template", "href": "https://docs.trifork.com/display/TSDP/Consent+template" }, "note": "Run the consent validity checklist (clear language, specific purpose, data described, processing described, controller/processor/sub-processors named, systems and locations described, rights described, checkbox driven)." },
+    { "id": "client-approves-consent", "title": "Get written client approval of the consent form", "destination": "Consents", "link": null, "note": "Client appears as data controller and sender, and takes responsibility for storing consent documentation. If the client refuses this, contact the SDP agent." },
+    { "id": "restart-process", "title": "Restart the SDP process from the beginning and update Article 30", "destination": "Article 30", "link": null, "note": "Material change detected. Re-run the wizard from \"Before contract signing\"." },
+    { "id": "no-action", "title": "No action required this cycle", "destination": "Notes", "link": null, "note": "Re-check next month or at project finish." },
+    { "id": "close-article-30", "title": "Update Article 30 and mark the project completed", "destination": "Article 30", "link": { "label": "Duckwise Article 30", "href": "https://docs.trifork.com/display/TSDP/Duckwise+Article+30" }, "note": "Final close out. Confirm the row is current and mark complete." },
+    { "id": "verify-deletion", "title": "Verify that data slated for deletion has actually been deleted", "destination": "Closeout", "link": null, "note": "Cross-check against consents and DPAs to confirm deletion obligations are met." },
+    { "id": "complete-deletion", "title": "Complete the outstanding deletions before closing the project", "destination": "Closeout", "link": null, "note": "Deletions defined by consents and DPAs must be done before marking the project complete." }
+  ],
+
+  "rules": [
+    { "if": { "step": "data-type", "equals": "sensitive" }, "then": ["contact-sdp-agent-sensitive"] },
+    { "if": { "phase": "before-contract" }, "then": ["start-article-30-row", "fill-classification-files"] },
+    { "if": { "step": "project-category-set", "equals": "no" }, "then": ["set-project-category"] },
+    { "if": { "step": "ai-tools", "equals": "yes" }, "then": ["fill-ai-tools-agreement"] },
+    { "if": { "step": "dpa-needed", "equals": "yes" }, "then": ["create-dpa"] },
+    { "if": { "step": "controller-role", "equals": "client-refuses" }, "then": ["contact-sdp-agent-controller-refused"] },
+    { "if": { "step": "team-signoff", "equals": "no" }, "then": ["team-signoff-row"] },
+    { "if": { "step": "tools-listed", "equals": "no" }, "then": ["list-tools-on-levels", "list-client-accounts-level-3"] },
+    { "if": { "step": "handbooks-read", "equals": "no" }, "then": ["read-system-handbooks"] },
+    { "if": { "step": "consents-needed", "equals": "yes" }, "then": ["draft-consent", "client-approves-consent"] },
+    { "if": { "step": "changes-affect-article-30", "equals": "yes" }, "then": ["restart-process"] },
+    { "if": { "step": "changes-affect-article-30", "equals": "no" }, "then": ["no-action"] },
+    { "if": { "step": "finish-changes", "equals": "yes" }, "then": ["restart-process"] },
+    { "if": { "step": "finish-changes", "equals": "no" }, "then": ["close-article-30"] },
+    { "if": { "step": "deletion-done", "equals": "yes" }, "then": ["verify-deletion"] },
+    { "if": { "step": "deletion-done", "equals": "no" }, "then": ["complete-deletion"] }
+  ]
+}

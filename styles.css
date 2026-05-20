@@ -7,7 +7,8 @@
   --accent: #1f2026;
   --orange: #ed6c2d;
   --orange-hover: #d65b1d;
-  --max-w: 920px;
+  --max-w: 1100px;
+  --text-w: 68ch;
   --font-sans: "Poppins", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
 }
 
@@ -50,14 +51,31 @@ main {
   padding: 2.5rem 1.5rem 4rem;
 }
 
-h1 { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.01em; margin-top: 0; }
-h2 { font-weight: 600; }
-.subtitle { font-size: 1.05rem; color: var(--muted); margin-top: -0.5rem; }
+h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.01em; margin-top: 0; }
+h2 { font-weight: 600; font-size: 1.35rem; }
+.subtitle { font-size: 1rem; color: var(--muted); margin-top: -0.5rem; }
 
-.picker-heading { font-size: 1.35rem; margin-top: 2.25rem; margin-bottom: 0.35rem; }
+/* Body text line-length cap — keep prose under ~70 characters for comfortable reading */
+main p { max-width: var(--text-w); }
+.question h2,
+.option-hint {
+  max-width: var(--text-w);
+}
+
+.picker-heading { font-size: 1.4rem; margin-top: 2.5rem; margin-bottom: 0.35rem; }
 .stuck-hint { color: var(--muted); margin-top: 0.5rem; }
 
-.phase-list { list-style: none; padding: 0; margin: 1rem 0 1.5rem; display: grid; gap: 1rem; }
+.phase-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 1.5rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 720px) {
+  .phase-list { grid-template-columns: 1fr 1fr; }
+}
 .phase-card {
   display: block;
   border: 1px solid var(--line);

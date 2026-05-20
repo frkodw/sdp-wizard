@@ -88,7 +88,7 @@ function updateHeader(route) {
     const phase = state.process.phases.find(p => p.id === route.phase);
     if (phase) {
       const phaseNo = phaseNumber(phase.id);
-      titleEl.innerHTML = `<span class="phase-prefix">Phase ${phaseNo}.</span>${escapeHtml(phase.title)}`;
+      titleEl.innerHTML = `<span class="phase-prefix">Phase ${phaseNo}</span>${escapeHtml(phase.title)}`;
       actionEl.innerHTML = `<a href="#/">← Back to phases</a>`;
       return;
     }
@@ -308,7 +308,7 @@ function renderSummary(route) {
   root.innerHTML = `
     <section class="summary">
       <a href="${buildHash({ view: "wizard", phase: phase.id, step: phase.steps[0].id })}" class="back">← Back to wizard</a>
-      <h1>Actions for phase ${phaseNo}. ${escapeHtml(phase.title.toLowerCase())}</h1>
+      <h1>Actions for phase ${phaseNo} ${escapeHtml(phase.title.toLowerCase())}</h1>
       <p class="subtitle">${countLine} Tick items as you work through them. Use the buttons below to copy the list into your Confluence project page.</p>
 
       ${vpnNote ? `<p class="vpn-note">${escapeHtml(vpnNote)}</p>` : ""}

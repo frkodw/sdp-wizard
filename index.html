@@ -4,21 +4,36 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Duckwise SDP Process Wizard</title>
+  <meta name="description" content="A guided wizard for the Duckwise SDP (Security & Data Protection) process. Pick the phase you are in, answer the decisions, get a checklist to paste into Confluence.">
+  <link rel="icon" type="image/svg+xml" href="assets/duckwise-badge.svg">
+  <meta property="og:title" content="Duckwise SDP Process Wizard">
+  <meta property="og:description" content="A guided wizard for the Duckwise SDP process. Pick the phase, answer the decisions, get a checklist for Confluence.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://frkodw.github.io/sdp-wizard/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Lora:ital,wght@0,500;0,600;0,700&display=swap">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="site-header">
     <a href="#/" class="site-title">
-      <img class="site-logo" src="assets/duckwise-badge.svg" alt="" width="28" height="28">
+      <img class="site-logo" src="assets/duckwise-badge.svg" alt="" width="34" height="34">
       <span>SDP Process Wizard</span>
     </a>
+    <div class="header-title" id="header-title"></div>
+    <div class="header-action" id="header-action"></div>
   </header>
   <main id="app">
     <p>Loading…</p>
   </main>
+  <footer class="site-footer">
+    <small>
+      Built by Duckwise ·
+      <a href="https://docs.trifork.com/pages/resumedraft.action?draftId=51195398&draftShareId=550ea4f9-5dfc-46fa-ab4a-cf9f6e7f5cb2&" target="_blank" rel="noopener noreferrer">SDP process source</a> ·
+      <a href="https://github.com/frkodw/sdp-wizard" target="_blank" rel="noopener noreferrer">repo</a>
+    </small>
+  </footer>
   <script type="module" src="app.js"></script>
 </body>
 </html>

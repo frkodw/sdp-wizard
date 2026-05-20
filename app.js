@@ -24,6 +24,39 @@ function resetDecisions() {
   state.decisions = {};
 }
 
+function phaseNumber(phaseId) {
+  return state.process.phases.findIndex(p => p.id === phaseId) + 1;
+}
+
+function shortLabel(step) {
+  return step.shortLabel || step.question;
+}
+
+// For each action, return human-readable reasons explaining which step+answer triggered it.
+// Phase-level rules are omitted from reasons — they're always-on for the current phase
+// and don't tell the user anything useful.
+function reasonsForAction(actionId, state_, processData) {
+  const phase = processData.phases.find(p => p.id === state_.phase);
+  if (!phase) return [];
+  const stepsById = Object.fromEntries(phase.steps.map(s => [s.id, s]));
+  const reasons = [];
+  for (const rule of processData.rules) {
+    if (!rule.then.includes(actionId)) continue;
+    if (!rule.if.step) continue;
+    const step = stepsById[rule.if.step];
+    if (!step) continue;
+    const decision = state_.decisions[rule.if.step];
+    const matches = Array.isArray(decision)
+      ? decision.includes(rule.if.equals)
+      : decision === rule.if.equals;
+    if (!matches) continue;
+    const option = step.options.find(o => o.value === rule.if.equals);
+    const optionLabel = option ? option.label : rule.if.equals;
+    reasons.push(`${shortLabel(step)}: ${optionLabel}`);
+  }
+  return reasons;
+}
+
 const root = document.getElementById("app");
 
 async function init() {
@@ -35,17 +68,37 @@ async function init() {
 
 function render() {
   const route = parseHash(location.hash);
+  document.body.className = "view-" + route.view;
+  updateHeader(route);
   switch (route.view) {
     case "phase-picker": renderPhasePicker(); break;
     case "explainer":    renderExplainer();   break;
     case "wizard":       renderWizard(route); break;
     case "summary":      renderSummary(route); break;
   }
+  window.scrollTo({ top: 0, behavior: "instant" });
+}
+
+function updateHeader(route) {
+  const titleEl = document.getElementById("header-title");
+  const actionEl = document.getElementById("header-action");
+  if (!titleEl || !actionEl) return;
+
+  if (route.view === "wizard" && route.phase) {
+    const phase = state.process.phases.find(p => p.id === route.phase);
+    if (phase) {
+      const phaseNo = phaseNumber(phase.id);
+      titleEl.innerHTML = `<span class="phase-prefix">Phase ${phaseNo}.</span>${escapeHtml(phase.title)}`;
+      actionEl.innerHTML = `<a href="#/">← Back to phases</a>`;
+      return;
+    }
+  }
+  titleEl.innerHTML = "";
+  actionEl.innerHTML = "";
 }
 
 function renderPhasePicker() {
   const overview = state.process.overviewLink;
-  const vpnNote = state.process.vpnNote;
   root.innerHTML = `
     <section class="phase-picker">
       <h1>Duckwise SDP process for projects</h1>
@@ -58,18 +111,30 @@ function renderPhasePicker() {
         </div>
       ` : ""}
 
-      <h2 class="picker-heading">Start by selecting the phase your project is in</h2>
-      <p>Each phase walks you through the decisions for that part of the SDP process. Nothing about your project is stored. Only the choices you make in the wizard.</p>
+      <h2 class="picker-heading">Phases</h2>
+      <p class="section-intro">Start by selecting the phase your project is in. Each phase walks you through the decisions for that part of the SDP process. Nothing about your project is stored, only the choices you make in the wizard.</p>
 
-      <ul class="phase-list">
-        ${state.process.phases.map(p => `
+      <ol class="phase-list">
+        ${state.process.phases.map((p, i) => {
+          const num = String(i + 1).padStart(2, "0");
+          return `
           <li><a class="phase-card" href="${buildHash({ view: "wizard", phase: p.id })}">
-            <h2>${escapeHtml(p.title)}</h2>
-            <p>${escapeHtml(p.intro)}</p>
-            ${p.responsible ? `<span class="responsible-label">Responsible: ${escapeHtml(p.responsible)}</span>` : ""}
+            <div class="phase-card-visual">
+              <span class="phase-card-num">${num}</span>
+            </div>
+            <div class="phase-card-body">
+              <div class="phase-card-head">
+                <h3 class="phase-card-title">${escapeHtml(p.title)}</h3>
+                ${p.responsible ? `<span class="responsible-label">${escapeHtml(p.responsible)}</span>` : ""}
+              </div>
+              <p class="phase-card-desc">${escapeHtml(p.intro)}</p>
+              <div class="phase-card-foot">
+                <span class="phase-card-cta">Start →</span>
+              </div>
+            </div>
           </a></li>
-        `).join("")}
-      </ul>
+        `;}).join("")}
+      </ol>
 
       <p class="stuck-hint">Stuck on a question? Check the helper text on the step, consult the SDP process overview, or reach out to your SDP agent.</p>
 
@@ -90,6 +155,9 @@ function renderExplainer() {
       <p>Regular updates demonstrate accountability, facilitate audits, and reduce risks associated with outdated or incomplete documentation. Customers choose companies that are GDPR compliant and ISO certified over those that are not.</p>
       <h2>Who</h2>
       <p>Product/project leads are responsible for keeping Article 30 current. The work can be delegated to other members of the team.</p>
+      <div class="explainer-cta">
+        <a class="btn primary" href="#/">Start the wizard →</a>
+      </div>
     </section>
   `;
 }
@@ -108,72 +176,79 @@ function renderWizard(route) {
   const inputType = isMulti ? "checkbox" : "radio";
   const prev = prevStepHash(phase, step);
 
+  const stepIndex = phase.steps.findIndex(s => s.id === step.id);
+  const totalSteps = phase.steps.length;
+  const progressPct = Math.round(((stepIndex + 1) / totalSteps) * 100);
+
+  const nextLabel = isLastStep(phase, step) ? "View summary →" : "Next →";
+  const nextHref = nextStepHash(phase, step);
+
   root.innerHTML = `
     <section class="wizard">
-      <a href="#/" class="back">← Back to phases</a>
-      <h1>${escapeHtml(phase.title)}</h1>
-      ${phase.responsible ? `<p class="responsible-line"><span class="responsible-label">Responsible: ${escapeHtml(phase.responsible)}</span></p>` : ""}
-      <p class="subtitle">${escapeHtml(phase.intro)}</p>
-
       <div class="wizard-grid">
-        <nav class="sidebar" aria-label="Phase steps">
+        <nav class="step-list" aria-label="Steps in this phase">
           <ol>
             ${phase.steps.map(s => {
               const isCurrent = s.id === step.id;
               const answered = isAnswered(state.decisions[s.id]);
-              const cls = [
-                isCurrent ? "current" : "",
-                answered ? "answered" : "future"
-              ].filter(Boolean).join(" ");
+              const cls = isCurrent ? "current" : (answered ? "answered" : "future");
               return `<li class="${cls}">
                 <a href="${buildHash({ view: "wizard", phase: phase.id, step: s.id })}">
-                  <span class="marker">${answered ? "✓" : "·"}</span>
-                  <span class="step-title">${escapeHtml(s.question)}</span>
+                  <span class="marker">${answered && !isCurrent ? "✓" : ""}</span>
+                  <span class="step-title">${escapeHtml(shortLabel(s))}</span>
                 </a>
               </li>`;
             }).join("")}
             <li class="summary-link">
               <a href="${buildHash({ view: "summary", phase: phase.id })}">
-                <span class="marker">→</span><span class="step-title">View summary</span>
+                <span class="marker"></span>
+                <span>Summary</span>
               </a>
             </li>
           </ol>
         </nav>
 
-        <article class="question">
-          <h2>${escapeHtml(step.question)}</h2>
-          ${isMulti ? `<p class="multi-hint">Tick every option that applies.</p>` : ""}
-          <details class="context">
-            <summary>Definitions / why we ask</summary>
-            <p>${escapeHtml(step.context)}</p>
-          </details>
+        <div class="wizard-main">
+<article class="question">
+        <h2>${escapeHtml(step.question)}</h2>
+        <p class="context-text">${escapeHtml(step.context)}</p>
+        ${isMulti ? `<p class="question-hint">Tick every option that applies.</p>` : ""}
 
-          <form id="decision-form">
-            <fieldset>
-              <legend class="sr-only">${escapeHtml(step.question)}</legend>
-              ${step.options.map(opt => {
-                const checked = isOptionChecked(selected, opt.value);
-                return `
-                <label class="option ${checked ? "selected" : ""}">
-                  <input type="${inputType}" name="answer" value="${escapeHtml(opt.value)}" ${checked ? "checked" : ""}>
+        <form id="decision-form">
+          <fieldset>
+            <legend class="sr-only">${escapeHtml(step.question)}</legend>
+            ${step.options.map(opt => {
+              const checked = isOptionChecked(selected, opt.value);
+              return `
+              <label class="option ${checked ? "selected" : ""}">
+                <div class="option-content">
                   <span class="option-label">${escapeHtml(opt.label)}</span>
                   ${opt.hint ? `<span class="option-hint">${escapeHtml(opt.hint)}</span>` : ""}
-                </label>
-              `;}).join("")}
-            </fieldset>
-            <div class="nav-row">
-              ${prev ? `<a class="btn ghost" href="${prev}">← Previous</a>` : `<span></span>`}
-              <button type="button" id="next-btn" class="btn primary" ${isAnswered(selected) ? "" : "disabled"}>
-                ${isLastStep(phase, step) ? "View summary →" : "Next →"}
-              </button>
-            </div>
-          </form>
-        </article>
+                </div>
+                <input type="${inputType}" name="answer" value="${escapeHtml(opt.value)}" ${checked ? "checked" : ""}>
+              </label>
+            `;}).join("")}
+          </fieldset>
+        </form>
+      </article>
+        </div>
       </div>
     </section>
+
+    <nav class="wizard-footer" aria-label="Step navigation">
+      <div class="wizard-footer-inner">
+        ${prev
+          ? `<a class="btn ghost" href="${prev}">← Previous</a>`
+          : `<span class="nav-spacer"></span>`}
+        <span class="step-counter">Step ${stepIndex + 1} of ${totalSteps}</span>
+        <div class="progress-bar" role="progressbar" aria-valuenow="${progressPct}" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" style="width: ${progressPct}%"></div></div>
+        <button type="button" id="next-btn" class="btn primary" ${isAnswered(selected) ? "" : "disabled"}>
+          ${nextLabel}
+        </button>
+      </div>
+    </nav>
   `;
 
-  // Wire up: input change updates state; Next advances.
   const form = document.getElementById("decision-form");
   form.addEventListener("change", e => {
     if (e.target.name !== "answer") return;
@@ -184,11 +259,11 @@ function renderWizard(route) {
     } else {
       state.decisions[step.id] = e.target.value;
     }
-    render(); // re-render so sidebar check appears + Next enables/disables
+    render();
   });
   document.getElementById("next-btn").addEventListener("click", () => {
     if (!isAnswered(state.decisions[step.id])) return;
-    location.hash = nextStepHash(phase, step);
+    location.hash = nextHref;
   });
 }
 
@@ -222,32 +297,48 @@ function renderSummary(route) {
 
   const groups = groupBy(actions, "destination");
   const vpnNote = state.process.vpnNote;
+  const phaseNo = phaseNumber(phase.id);
+
+  const actionCount = actions.length;
+  const destinationCount = groups.size;
+  const countLine = actionCount === 0
+    ? "No actions to take based on your answers."
+    : `${actionCount} ${actionCount === 1 ? "action" : "actions"} across ${destinationCount} ${destinationCount === 1 ? "destination" : "destinations"}.`;
 
   root.innerHTML = `
     <section class="summary">
       <a href="${buildHash({ view: "wizard", phase: phase.id, step: phase.steps[0].id })}" class="back">← Back to wizard</a>
-      <h1>Actions for ${escapeHtml(phase.title.toLowerCase())}</h1>
-      <p class="subtitle">Tick items as you work through them. Use the buttons below to copy the list into your Confluence project page.</p>
+      <h1>Actions for phase ${phaseNo}. ${escapeHtml(phase.title.toLowerCase())}</h1>
+      <p class="subtitle">${countLine} Tick items as you work through them. Use the buttons below to copy the list into your Confluence project page.</p>
 
       ${vpnNote ? `<p class="vpn-note">${escapeHtml(vpnNote)}</p>` : ""}
 
-      ${actions.length === 0 ? `<p class="empty">No actions triggered by your current answers.</p>` : ""}
+      ${actions.length === 0 ? `<p class="empty">Adjust your answers in the wizard to see what to do next.</p>` : ""}
 
       ${Array.from(groups.entries()).map(([dest, items]) => `
-        <h2>${escapeHtml(dest)}</h2>
-        <ul class="action-list">
-          ${items.map(a => `
-            <li>
-              <label>
-                <input type="checkbox" class="action-check" data-id="${escapeHtml(a.id)}">
-                <span class="action-title">${escapeHtml(a.title)}</span>
-                ${a.link ? `<a class="action-link" href="${escapeHtml(a.link.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(a.link.label)} ↗</a>` : ""}
-                ${a.link && a.link.href.startsWith("REPLACE_") ? `<span class="placeholder-badge" title="Replace this URL in process.json">link not configured</span>` : ""}
-                ${a.note ? `<p class="action-note">${escapeHtml(a.note)}</p>` : ""}
-              </label>
-            </li>
-          `).join("")}
-        </ul>
+        <section class="action-group">
+          <h2>${escapeHtml(dest)}</h2>
+          <ul class="action-list">
+            ${items.map(a => {
+              const reasons = reasonsForAction(a.id, { phase: phase.id, decisions: state.decisions }, state.process);
+              return `
+              <li>
+                <label>
+                  <input type="checkbox" class="action-check" data-id="${escapeHtml(a.id)}">
+                  <div class="action-body">
+                    <div class="action-head">
+                      <span class="action-title">${escapeHtml(a.title)}</span>
+                      ${a.link ? `<a class="action-link" href="${escapeHtml(a.link.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(a.link.label)} ↗</a>` : ""}
+                      ${a.link && a.link.href.startsWith("REPLACE_") ? `<span class="placeholder-badge" title="Replace this URL in process.json">link not configured</span>` : ""}
+                    </div>
+                    ${a.note ? `<p class="action-note">${escapeHtml(a.note)}</p>` : ""}
+                    ${reasons.length ? `<p class="action-reason">Because: ${reasons.map(escapeHtml).join("; ")}</p>` : ""}
+                  </div>
+                </label>
+              </li>
+            `;}).join("")}
+          </ul>
+        </section>
       `).join("")}
 
       <div class="actions-row">
@@ -258,13 +349,22 @@ function renderSummary(route) {
         <button id="finish-btn" class="btn finish" title="Clears all answers and returns you to the phase picker.">Finish &amp; start over</button>
       </div>
     </section>
+
+    <div id="done-flash" class="done-flash" aria-hidden="true">
+      <div class="done-flash-card">Done. See you next time.</div>
+    </div>
   `;
 
   document.getElementById("copy-md").addEventListener("click", () => copy(toMarkdown(actions, phase), "md"));
   document.getElementById("copy-txt").addEventListener("click", () => copy(toPlainText(actions, phase), "txt"));
   document.getElementById("finish-btn").addEventListener("click", () => {
-    resetDecisions();
-    location.hash = "#/";
+    const flash = document.getElementById("done-flash");
+    flash.classList.add("visible");
+    flash.setAttribute("aria-hidden", "false");
+    setTimeout(() => {
+      resetDecisions();
+      location.hash = "#/";
+    }, 850);
   });
 }
 

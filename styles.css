@@ -17,8 +17,9 @@
   --orange-soft: #FFDAC2;
   --orange-soft-border: #F0B89A;
 
-  /* Secondary — blue (selected option, info tint) */
+  /* Secondary — blue (selected option, info tint, phase card accent) */
   --blue-soft: #DDE9F0;
+  --blue-soft-border: #BCD3DF;
 
   /* Secondary — yellow (warnings / placeholder badge) */
   --yellow-soft: #FFECD1;
@@ -192,14 +193,14 @@ main p { max-width: var(--text-w); }
   border-color: var(--line-strong);
 }
 .phase-card-visual {
-  background: var(--orange-soft);
+  background: var(--blue-soft);
   min-height: 190px;
   padding: 1.75rem 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  border-bottom: 1px solid var(--orange-soft-border);
+  border-bottom: 1px solid var(--blue-soft-border);
 }
 .phase-card-num {
   font-family: var(--font-serif);

@@ -8,22 +8,31 @@ Live URL: https://frkodw.github.io/sdp-wizard/
 
 ## Repo layout
 
-- `site/` — the static site (vanilla HTML / CSS / ES modules, no build step). See `site/README.md` for local dev instructions.
-- `tests/` — Node-based unit tests for the pure-function lib (`node --test`, no npm dependencies).
-- `.github/workflows/pages.yml` — runs tests then deploys `site/` to GitHub Pages on push to `master`.
+The site lives at the repo root so GitHub Pages can serve it directly.
 
-## Run tests
+- `index.html`, `styles.css`, `app.js` — the page
+- `process.json` — content (phases, decisions, actions, rules)
+- `lib/` — pure-function modules (rules engine, markdown formatter, router)
+- `assets/` — static assets
+- `tests/` — Node-based unit tests (`node --test`, no npm dependencies)
+- `.github/workflows/pages.yml` — runs tests then deploys to GitHub Pages
 
-From repo root. Requires Node ≥18 (uses the built-in `node --test`):
+## Edit the process
 
-    npm test
+All decisions, branches, and action items live in `process.json`. Edit, refresh — no build step.
 
 ## Run locally
 
-    cd site && python3 -m http.server 8080
+    python3 -m http.server 8080
 
 Then open http://localhost:8080.
 
+## Run tests
+
+Requires Node ≥18 (uses the built-in `node --test`):
+
+    npm test
+
 ## Deploy
 
-Push to `master`. The Pages workflow runs the tests and then publishes `/site/`. First-time setup on a fresh repo: GitHub repo Settings → Pages → Source: **GitHub Actions**.
+Push to `master`. The Pages workflow runs the tests and then publishes the root. First-time setup on a fresh repo: GitHub repo Settings → Pages → Source: **GitHub Actions**.

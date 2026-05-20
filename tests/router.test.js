@@ -1,7 +1,7 @@
 // tests/router.test.js
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseHash, buildHash } from "../site/lib/router.js";
+import { parseHash, buildHash } from "../lib/router.js";
 
 test("empty hash maps to phase picker", () => {
   assert.deepEqual(parseHash(""), { view: "phase-picker" });

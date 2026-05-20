@@ -1,7 +1,7 @@
 // tests/markdown.test.js
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { toMarkdown, toPlainText } from "../site/lib/markdown.js";
+import { toMarkdown, toPlainText } from "../lib/markdown.js";
 
 const samplePhase = { id: "before-contract", title: "Before contract signing" };
 

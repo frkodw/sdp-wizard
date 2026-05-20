@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const data = JSON.parse(await readFile(new URL("../site/process.json", import.meta.url), "utf8"));
+const data = JSON.parse(await readFile(new URL("../process.json", import.meta.url), "utf8"));
 
 test("process.json has four phases with required fields", () => {
   assert.equal(data.phases.length, 4, "expected 4 phases");

@@ -2,9 +2,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { computeActions } from "../site/lib/rules.js";
+import { computeActions } from "../lib/rules.js";
 
-const processData = JSON.parse(await readFile(new URL("../site/process.json", import.meta.url), "utf8"));
+const processData = JSON.parse(await readFile(new URL("../process.json", import.meta.url), "utf8"));
 
 test("phase-level rule always fires for matching phase", () => {
   const actions = computeActions({ phase: "before-contract", decisions: {} }, processData);

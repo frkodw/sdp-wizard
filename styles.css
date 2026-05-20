@@ -1,15 +1,29 @@
 /* Duckwise SDP Process Wizard — visual styles. */
 :root {
-  --bg: #ffffff;
-  --fg: #111111;
-  --muted: #6a6a6a;
-  --line: #e8e8e6;
-  --line-strong: #d6d6d2;
-  --accent: #1f2026;
-  --orange: #ed6c2d;
-  --orange-hover: #d65b1d;
-  --orange-soft: #fff4ec;
-  --orange-soft-border: #f7d6bf;
+  /* Duckwise design system tokens */
+  --bg: #FFFFFF;                  /* White */
+  --fg: #1F2026;                  /* Ducking Black */
+  --accent: #1F2026;              /* Ducking Black */
+  --muted: #566168;               /* Neutral 80% */
+  --muted-soft: #80898E;          /* Neutral 60% */
+  --line-strong: #D5D8D9;         /* Neutral 20% */
+  --line: #DFE1E3;                /* Neutral 15% */
+  --surface-soft: #F4F5F6;        /* Neutral 5% */
+  --disabled: #ABB0B3;            /* Neutral 40% */
+
+  /* Secondary — orange (CTA, active accents) */
+  --orange: #FF6600;
+  --orange-hover: #CE3E00;
+  --orange-soft: #FFDAC2;
+  --orange-soft-border: #F0B89A;
+
+  /* Secondary — blue (selected option, info tint) */
+  --blue-soft: #DDE9F0;
+
+  /* Secondary — yellow (warnings / placeholder badge) */
+  --yellow-soft: #FFECD1;
+  --yellow-strong: #F19204;
+
   --max-w: 1100px;
   --text-w: 68ch;
   --font-sans: "Poppins", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
@@ -91,7 +105,7 @@ body {
   white-space: nowrap;
   transition: border-color 100ms ease, background 100ms ease;
 }
-.header-action a:hover { border-color: var(--accent); background: #fafafa; }
+.header-action a:hover { border-color: var(--accent); background: var(--surface-soft); }
 
 .site-footer {
   border-top: 1px solid var(--line);
@@ -315,12 +329,15 @@ main p { max-width: var(--text-w); }
 .step-list a:hover { color: var(--accent); }
 .step-list .summary-link {
   margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
 }
 .step-list .summary-link a {
   color: var(--muted);
   font-weight: 500;
 }
 .step-list .summary-link a:hover { color: var(--accent); }
+.step-list .summary-link.current a { color: var(--fg); font-weight: 700; }
 
 .question {
   background: transparent;
@@ -394,10 +411,13 @@ main p { max-width: var(--text-w); }
 .wizard-footer .btn.ghost { border-color: var(--line-strong); }
 .wizard-footer .nav-spacer { min-width: 7.5rem; }
 
-/* When the wizard view is active, hide the site footer (sticky wizard footer
-   takes its place) and pad the main content so it isn't hidden under it. */
-body.view-wizard .site-footer { display: none; }
-body.view-wizard main { padding-bottom: 6rem; }
+/* When the wizard or summary view is active, hide the site footer (the sticky
+   wizard footer takes its place) and pad the main content so it isn't hidden
+   under it. */
+body.view-wizard .site-footer,
+body.view-summary .site-footer { display: none; }
+body.view-wizard main,
+body.view-summary main { padding-bottom: 6rem; }
 
 .option {
   display: flex;
@@ -414,7 +434,7 @@ body.view-wizard main { padding-bottom: 6rem; }
 .option:hover { border-color: var(--line-strong); }
 .option.selected {
   border-color: var(--accent);
-  background: #eef2f7;
+  background: var(--blue-soft);
 }
 .option-content {
   flex: 1;
@@ -452,7 +472,7 @@ fieldset { border: 0; padding: 0; margin: 0; }
   transition: background 100ms ease, color 100ms ease;
 }
 .btn.primary { background: var(--accent); color: #fff; }
-.btn.primary[disabled] { background: #b8b8b6; cursor: not-allowed; }
+.btn.primary[disabled] { background: var(--disabled); cursor: not-allowed; }
 .btn.ghost { color: var(--muted); border-color: var(--line); background: #fff; }
 .btn.ghost:hover { color: var(--fg); border-color: var(--line-strong); }
 .btn.cta {
@@ -479,7 +499,7 @@ fieldset { border: 0; padding: 0; margin: 0; }
 /* Responsible label */
 .responsible-label {
   display: inline-block;
-  background: #f4f4f3;
+  background: var(--surface-soft);
   color: var(--fg);
   font-size: 0.78rem;
   font-weight: 600;
@@ -557,8 +577,8 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .placeholder-badge {
   font-size: 0.74rem;
   padding: 0.1rem 0.45rem;
-  background: #fff3cd;
-  color: #5a4500;
+  background: var(--yellow-soft);
+  color: var(--yellow-strong);
   border-radius: 4px;
 }
 

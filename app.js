@@ -84,7 +84,7 @@ function updateHeader(route) {
   const actionEl = document.getElementById("header-action");
   if (!titleEl || !actionEl) return;
 
-  if (route.view === "wizard" && route.phase) {
+  if ((route.view === "wizard" || route.view === "summary") && route.phase) {
     const phase = state.process.phases.find(p => p.id === route.phase);
     if (phase) {
       const phaseNo = phaseNumber(phase.id);
@@ -297,7 +297,6 @@ function renderSummary(route) {
 
   const groups = groupBy(actions, "destination");
   const vpnNote = state.process.vpnNote;
-  const phaseNo = phaseNumber(phase.id);
 
   const actionCount = actions.length;
   const destinationCount = groups.size;
@@ -305,50 +304,84 @@ function renderSummary(route) {
     ? "No actions to take based on your answers."
     : `${actionCount} ${actionCount === 1 ? "action" : "actions"} across ${destinationCount} ${destinationCount === 1 ? "destination" : "destinations"}.`;
 
+  const lastStepId = phase.steps[phase.steps.length - 1].id;
+  const prevHref = buildHash({ view: "wizard", phase: phase.id, step: lastStepId });
+
   root.innerHTML = `
     <section class="summary">
-      <a href="${buildHash({ view: "wizard", phase: phase.id, step: phase.steps[0].id })}" class="back">← Back to wizard</a>
-      <h1>Actions for phase ${phaseNo} ${escapeHtml(phase.title.toLowerCase())}</h1>
-      <p class="subtitle">${countLine} Tick items as you work through them. Use the buttons below to copy the list into your Confluence project page.</p>
+      <div class="wizard-grid">
+        <nav class="step-list" aria-label="Steps in this phase">
+          <ol>
+            ${phase.steps.map(s => {
+              const answered = isAnswered(state.decisions[s.id]);
+              const cls = answered ? "answered" : "future";
+              return `<li class="${cls}">
+                <a href="${buildHash({ view: "wizard", phase: phase.id, step: s.id })}">
+                  <span class="marker">${answered ? "✓" : ""}</span>
+                  <span class="step-title">${escapeHtml(shortLabel(s))}</span>
+                </a>
+              </li>`;
+            }).join("")}
+            <li class="summary-link current">
+              <a href="${buildHash({ view: "summary", phase: phase.id })}">
+                <span class="marker"></span>
+                <span>Summary</span>
+              </a>
+            </li>
+          </ol>
+        </nav>
 
-      ${vpnNote ? `<p class="vpn-note">${escapeHtml(vpnNote)}</p>` : ""}
+        <div class="wizard-main">
+          <h1>Summary</h1>
+          <p class="subtitle">${countLine} Tick items as you work through them. Use the buttons below to copy the list into your Confluence project page.</p>
 
-      ${actions.length === 0 ? `<p class="empty">Adjust your answers in the wizard to see what to do next.</p>` : ""}
+          ${vpnNote ? `<p class="vpn-note">${escapeHtml(vpnNote)}</p>` : ""}
 
-      ${Array.from(groups.entries()).map(([dest, items]) => `
-        <section class="action-group">
-          <h2>${escapeHtml(dest)}</h2>
-          <ul class="action-list">
-            ${items.map(a => {
-              const reasons = reasonsForAction(a.id, { phase: phase.id, decisions: state.decisions }, state.process);
-              return `
-              <li>
-                <label>
-                  <input type="checkbox" class="action-check" data-id="${escapeHtml(a.id)}">
-                  <div class="action-body">
-                    <div class="action-head">
-                      <span class="action-title">${escapeHtml(a.title)}</span>
-                      ${a.link ? `<a class="action-link" href="${escapeHtml(a.link.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(a.link.label)} ↗</a>` : ""}
-                      ${a.link && a.link.href.startsWith("REPLACE_") ? `<span class="placeholder-badge" title="Replace this URL in process.json">link not configured</span>` : ""}
-                    </div>
-                    ${a.note ? `<p class="action-note">${escapeHtml(a.note)}</p>` : ""}
-                    ${reasons.length ? `<p class="action-reason">Because: ${reasons.map(escapeHtml).join("; ")}</p>` : ""}
-                  </div>
-                </label>
-              </li>
-            `;}).join("")}
-          </ul>
-        </section>
-      `).join("")}
+          ${actions.length === 0 ? `<p class="empty">Adjust your answers in the wizard to see what to do next.</p>` : ""}
 
-      <div class="actions-row">
-        <button id="copy-md" class="btn ghost">Copy as Markdown</button>
-        <button id="copy-txt" class="btn ghost">Copy as plain text</button>
-        <span id="copy-feedback" class="copy-feedback" aria-live="polite"></span>
-        <span class="finish-spacer"></span>
-        <button id="finish-btn" class="btn finish" title="Clears all answers and returns you to the phase picker.">Finish &amp; start over</button>
+          ${Array.from(groups.entries()).map(([dest, items]) => `
+            <section class="action-group">
+              <h2>${escapeHtml(dest)}</h2>
+              <ul class="action-list">
+                ${items.map(a => {
+                  const reasons = reasonsForAction(a.id, { phase: phase.id, decisions: state.decisions }, state.process);
+                  return `
+                  <li>
+                    <label>
+                      <input type="checkbox" class="action-check" data-id="${escapeHtml(a.id)}">
+                      <div class="action-body">
+                        <div class="action-head">
+                          <span class="action-title">${escapeHtml(a.title)}</span>
+                          ${a.link ? `<a class="action-link" href="${escapeHtml(a.link.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(a.link.label)} ↗</a>` : ""}
+                          ${a.link && a.link.href.startsWith("REPLACE_") ? `<span class="placeholder-badge" title="Replace this URL in process.json">link not configured</span>` : ""}
+                        </div>
+                        ${a.note ? `<p class="action-note">${escapeHtml(a.note)}</p>` : ""}
+                        ${reasons.length ? `<p class="action-reason">Because: ${reasons.map(escapeHtml).join("; ")}</p>` : ""}
+                      </div>
+                    </label>
+                  </li>
+                `;}).join("")}
+              </ul>
+            </section>
+          `).join("")}
+
+          <div class="actions-row">
+            <button id="copy-md" class="btn ghost">Copy as Markdown</button>
+            <button id="copy-txt" class="btn ghost">Copy as plain text</button>
+            <span id="copy-feedback" class="copy-feedback" aria-live="polite"></span>
+          </div>
+        </div>
       </div>
     </section>
+
+    <nav class="wizard-footer" aria-label="Summary navigation">
+      <div class="wizard-footer-inner">
+        <a class="btn ghost" href="${prevHref}">← Previous</a>
+        <span class="step-counter">All ${phase.steps.length} steps answered</span>
+        <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" style="width: 100%"></div></div>
+        <button type="button" id="finish-btn" class="btn primary" title="Clears all answers and returns you to the phase picker.">Finish ✓</button>
+      </div>
+    </nav>
 
     <div id="done-flash" class="done-flash" aria-hidden="true">
       <div class="done-flash-card">Done. See you next time.</div>

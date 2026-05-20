@@ -300,12 +300,18 @@ function renderSummary(route) {
 
   const actionCount = actions.length;
   const destinationCount = groups.size;
-  const countLine = actionCount === 0
-    ? "No actions to take based on your answers."
-    : `${actionCount} ${actionCount === 1 ? "action" : "actions"} across ${destinationCount} ${destinationCount === 1 ? "destination" : "destinations"}.`;
 
   const lastStepId = phase.steps[phase.steps.length - 1].id;
   const prevHref = buildHash({ view: "wizard", phase: phase.id, step: lastStepId });
+
+  // Order destinations so escalations always surface first. Other groups keep
+  // the order in which they were first added (Map preserves insertion order).
+  const escalationKey = "Escalation";
+  const orderedGroups = new Map();
+  if (groups.has(escalationKey)) orderedGroups.set(escalationKey, groups.get(escalationKey));
+  for (const [k, v] of groups) {
+    if (k !== escalationKey) orderedGroups.set(k, v);
+  }
 
   root.innerHTML = `
     <section class="summary">
@@ -332,16 +338,25 @@ function renderSummary(route) {
         </nav>
 
         <div class="wizard-main">
-          <h1>Summary</h1>
-          <p class="subtitle">${countLine} Tick items as you work through them. Use the buttons below to copy the list into your Confluence project page.</p>
+          <h1>Your action checklist</h1>
+          ${actionCount === 0
+            ? `<p class="subtitle">No actions to take based on your answers.</p>`
+            : `<p class="action-count"><strong>${actionCount}</strong> ${actionCount === 1 ? "item" : "items"} across <strong>${destinationCount}</strong> ${destinationCount === 1 ? "destination" : "destinations"}.</p>
+               <p class="subtitle">Tick items as you go, then copy the list into your Confluence project page.</p>`}
 
           ${vpnNote ? `<p class="vpn-note">${escapeHtml(vpnNote)}</p>` : ""}
 
           ${actions.length === 0 ? `<p class="empty">Adjust your answers in the wizard to see what to do next.</p>` : ""}
 
-          ${Array.from(groups.entries()).map(([dest, items]) => `
-            <section class="action-group">
-              <h2>${escapeHtml(dest)}</h2>
+          ${Array.from(orderedGroups.entries()).map(([dest, items]) => {
+            const isEscalation = dest === escalationKey;
+            return `
+            <section class="action-group ${isEscalation ? "is-escalation" : ""}">
+              <h2>
+                <span class="action-group-title">${escapeHtml(dest)}</span>
+                <span class="action-group-count">${items.length}</span>
+                ${isEscalation ? `<span class="action-group-flag">Urgent</span>` : ""}
+              </h2>
               <ul class="action-list">
                 ${items.map(a => {
                   const reasons = reasonsForAction(a.id, { phase: phase.id, decisions: state.decisions }, state.process);
@@ -363,7 +378,7 @@ function renderSummary(route) {
                 `;}).join("")}
               </ul>
             </section>
-          `).join("")}
+          `;}).join("")}
 
           <div class="actions-row">
             <button id="copy-md" class="btn ghost">Copy as Markdown</button>

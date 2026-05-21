@@ -3,7 +3,7 @@
     "label": "SDP process overview",
     "href": "https://docs.trifork.com/pages/resumedraft.action?draftId=51195398&draftShareId=550ea4f9-5dfc-46fa-ab4a-cf9f6e7f5cb2&"
   },
-  "vpnNote": "To access the linked pages, make sure you are on Trifork's network or connected via Trifork VPN.",
+  "vpnNote": "You will need to be on Trifork's network or connected via VPN to access the linked pages.",
 
   "phases": [
     {
@@ -14,27 +14,67 @@
       "steps": [
         {
           "id": "data-type",
-          "shortLabel": "Data type",
-          "question": "What types of data is the project about to process?",
-          "context": "\"Processing\" means anything done to or with data, including collection, recording, storage, use, disclosure, and erasure. Tick every category that applies.",
+          "shortLabel": "Person criticality",
+          "question": "What types of personal data does the project process?",
+          "context": "\"Processing\" means anything done to or with personal data — collection, storage, use, disclosure, erasure.",
           "type": "multi",
           "options": [
-            { "value": "anonymous", "label": "Anonymous / public", "hint": "Publicly available info, fully anonymised data, synthetic/dummy data." },
-            { "value": "internal", "label": "Internal", "hint": "Internal docs, code, processes, templates, policies." },
-            { "value": "customer", "label": "Customer / project (under NDA)", "hint": "Customer code, designs, requirements, anything under contract or NDA." },
+            { "value": "anonymous", "label": "Anonymous / public", "hint": "Publicly available info, fully anonymised data, synthetic / dummy data." },
             { "value": "personal-non-sensitive", "label": "Non-sensitive personal data", "hint": "Name, address, email, phone, age, education, IP address." },
-            { "value": "sensitive", "label": "Sensitive personal data or secrets", "hint": "CPR, health, biometrics, salary/finance, HR cases, passwords, tokens, certificates, vulnerability details, production datasets." }
+            { "value": "sensitive", "label": "Sensitive personal data", "hint": "CPR, health, biometrics, salary / finance, HR cases, criminal records." }
           ]
         },
         {
-          "id": "project-category-set",
-          "shortLabel": "Project category",
-          "question": "Have you classified the project in Duckwise Project Categories?",
-          "context": "Each project type has its own classification and assessment files. Set the category before continuing so the right templates are used.",
+          "id": "customer-criticality",
+          "shortLabel": "Customer criticality",
+          "question": "What customer data or requirements are in scope?",
+          "context": "Customer criticality covers the customer's data sensitivity, NDA / IP requirements, and any security measures the engagement demands.",
+          "type": "multi",
+          "options": [
+            { "value": "none", "label": "No customer sensitive data or requirements" },
+            { "value": "internal", "label": "Internal Duckwise project", "hint": "Internal docs, code, processes, templates, policies." },
+            { "value": "customer-no-nda", "label": "Customer / project without NDA", "hint": "Customer code, designs, requirements, anything under contract." },
+            { "value": "secrets-nda", "label": "Secrets and NDA", "hint": "IP, business secrets, passwords, tokens, certificates, vulnerability details, production datasets. Anything under NDA." },
+            { "value": "security-measure", "label": "Security measures needed", "hint": "Red room, security-cleared personnel." }
+          ]
+        },
+        {
+          "id": "classify-society",
+          "shortLabel": "Society critical",
+          "question": "Is the project critical to society?",
+          "context": "Society-critical means the client operates in regulated or essential sectors such as finance, healthcare, public infrastructure, or government. If a failure or compromise would affect that sector beyond the client itself, pick yes.",
           "type": "yesno",
           "options": [
             { "value": "yes", "label": "Yes" },
-            { "value": "no", "label": "Not yet" }
+            { "value": "no", "label": "No" }
+          ]
+        },
+        {
+          "id": "classify-integrity",
+          "shortLabel": "Integrity risk",
+          "question": "How much incorrect data can Duckwise tolerate on this project?",
+          "context": "An indication of the degree of incorrect data that can be tolerated. Pick the option that best matches the project.",
+          "type": "single",
+          "options": [
+            { "value": "no",       "label": "No requirement or negligible impact" },
+            { "value": "low",      "label": "Low requirement — minimal impact, easy to remediate" },
+            { "value": "moderate", "label": "Moderate requirement — somewhat affected, easy to detect and remediate" },
+            { "value": "high",     "label": "High requirement — inaccuracies or omissions hard to tolerate" },
+            { "value": "absolute", "label": "Absolute requirement — no inaccuracies or omissions tolerated" }
+          ]
+        },
+        {
+          "id": "classify-downtime",
+          "shortLabel": "Availability risk",
+          "question": "How long can Duckwise function without the asset before it becomes critical or unacceptable?",
+          "context": "Pick the maximum tolerable downtime for the project.",
+          "type": "single",
+          "options": [
+            { "value": "14+",  "label": "More than 14 days" },
+            { "value": "7-14", "label": "7 to 14 days" },
+            { "value": "3-7",  "label": "3 to 7 days" },
+            { "value": "1-2",  "label": "1 to 2 days" },
+            { "value": "<1",   "label": "Less than 1 day" }
           ]
         },
         {
@@ -178,13 +218,12 @@
   ],
 
   "actions": [
-    { "id": "start-article-30-row", "title": "Start a new project row in Duckwise Article 30", "destination": "Article 30", "link": { "label": "Duckwise Article 30", "href": "https://docs.trifork.com/display/TSDP/Duckwise+Article+30" }, "note": "Open the Article 30 register and add a new row for this project." },
-    { "id": "fill-classification-files", "title": "Fill in the classification & assessment files for the project category", "destination": "Article 30", "link": { "label": "Duckwise Project Categories", "href": "https://docs.trifork.com/display/TSDP/Duckwise+Project+Categories" }, "note": "Use the templates that match the chosen project category." },
-    { "id": "contact-sdp-agent-sensitive", "title": "Contact your SDP agent before proceeding. The project will process sensitive data or secrets.", "destination": "Escalation", "link": null, "note": "Sensitive data and secrets require SDP agent involvement before contract signing." },
+    { "id": "start-article-30-row", "title": "Start a new row in Article 30", "destination": "Article 30", "link": { "label": "Duckwise Article 30", "href": "https://docs.trifork.com/display/TSDP/Duckwise+Article+30" }, "note": "Open the Article 30 register and add a new row for this project. Fill in the columns up to project classification. Use the Copy classification details button above to paste the answers into the \"Which type of data is/will be processed?\" column." },
+    { "id": "contact-sdp-agent-elevated", "title": "Contact your SDP agent before proceeding. The project has elevated-risk indicators.", "destination": "Escalation", "link": null, "note": "Any of these triggers SDP-agent involvement before contract signing: sensitive personal data, NDA / business secrets, security-cleared personnel, society-critical sector, absolute integrity requirement, or sub-1-day availability." },
     { "id": "fill-ai-tools-agreement", "title": "Have the client sign the Aftale om brug af hjælpeværktøjer (Helper tools agreement)", "destination": "Agreements", "link": { "label": "Aftale om brug af hjælpeværktøjer", "href": "https://docs.trifork.com/pages/viewpage.action?pageId=225582317" }, "note": "Fill in the tools list, get client signature, upload to Article 30." },
     { "id": "create-dpa", "title": "Create the Data Processor Agreement using the DBA Trifork template", "destination": "DPA", "link": { "label": "Data Processing Agreement", "href": "https://docs.trifork.com/display/TSDP/Date+Processing+Agreement" }, "note": "Make sure the relationship between controller, processor, and any sub-processors is described, including which systems Duckwise uses and whether they process data outside the EU or outside the US data privacy framework." },
     { "id": "contact-sdp-agent-controller-refused", "title": "Contact your SDP agent. The client is unwilling to figure as data controller.", "destination": "Escalation", "link": null, "note": "If a DPA is needed AND the client refuses the controller role, this must be escalated before continuing." },
-    { "id": "set-project-category", "title": "Classify the project in Duckwise Project Categories", "destination": "Article 30", "link": { "label": "Duckwise Project Categories", "href": "https://docs.trifork.com/display/TSDP/Duckwise+Project+Categories" }, "note": "Set the category so the right classification and assessment files apply." },
+    { "id": "set-project-category", "title": "Classify the project and fill in the assessment templates", "destination": "Article 30", "link": { "label": "Duckwise Project Categories", "href": "https://docs.trifork.com/display/TSDP/Duckwise+Project+Categories" }, "note": "Visit the Duckwise Project Categories page and find the template that best matches your project. Download and fill in the relevant templates, then upload them to the appropriate column in Article 30. If no overall description fits, use the next category above (higher risk) as a starting template and add the project under \"Custom project categories\" on the same page." },
     { "id": "team-signoff-row", "title": "Sign Section 3 (Team member signoff) on the annual cycle BU page", "destination": "Team signoff", "link": { "label": "Annual cycles (BU level)", "href": "https://docs.trifork.com/display/TSDP/Annual+cycles+-+BU+level" }, "note": "Every team member signs before touching the project." },
     { "id": "list-tools-on-levels", "title": "Add or update each tool on the correct Duckwise systems level (1/2/3)", "destination": "Duckwise systems", "link": { "label": "Duckwise systems", "href": "https://docs.trifork.com/display/TSDP/DK-AAR-DUCKS%2C+DK-AAL-DUCKS+and+DK-CPH-DUCKS%3A+Duckwise+systems" }, "note": "Match the level of data processing allowed to the project's tasks." },
     { "id": "read-system-handbooks", "title": "Read the handbooks for every system the team will use", "destination": "Team prep", "link": null, "note": "If a system has a handbook listed, every team member must read it before use." },
@@ -199,9 +238,13 @@
   ],
 
   "rules": [
-    { "if": { "step": "data-type", "equals": "sensitive" }, "then": ["contact-sdp-agent-sensitive"] },
-    { "if": { "phase": "before-contract" }, "then": ["start-article-30-row", "fill-classification-files"] },
-    { "if": { "step": "project-category-set", "equals": "no" }, "then": ["set-project-category"] },
+    { "if": { "phase": "before-contract" }, "then": ["start-article-30-row", "set-project-category"] },
+    { "if": { "step": "data-type",            "equals": "sensitive" },         "then": ["contact-sdp-agent-elevated"] },
+    { "if": { "step": "customer-criticality", "equals": "secrets-nda" },       "then": ["contact-sdp-agent-elevated"] },
+    { "if": { "step": "customer-criticality", "equals": "security-measure" }, "then": ["contact-sdp-agent-elevated"] },
+    { "if": { "step": "classify-society",     "equals": "yes" },               "then": ["contact-sdp-agent-elevated"] },
+    { "if": { "step": "classify-integrity",   "equals": "absolute" },          "then": ["contact-sdp-agent-elevated"] },
+    { "if": { "step": "classify-downtime",    "equals": "<1" },                "then": ["contact-sdp-agent-elevated"] },
     { "if": { "step": "ai-tools", "equals": "yes" }, "then": ["fill-ai-tools-agreement"] },
     { "if": { "step": "dpa-needed", "equals": "yes" }, "then": ["create-dpa"] },
     { "if": { "step": "controller-role", "equals": "client-refuses" }, "then": ["contact-sdp-agent-controller-refused"] },

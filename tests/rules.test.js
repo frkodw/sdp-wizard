@@ -9,7 +9,7 @@ const processData = JSON.parse(await readFile(new URL("../process.json", import.
 test("phase-level rule always fires for matching phase", () => {
   const actions = computeActions({ phase: "before-contract", decisions: {} }, processData);
   assert.ok(actions.includes("start-article-30-row"));
-  assert.ok(actions.includes("fill-classification-files"));
+  assert.ok(actions.includes("set-project-category"));
 });
 
 test("sensitive data triggers SDP escalation (multi-select array)", () => {
@@ -17,7 +17,7 @@ test("sensitive data triggers SDP escalation (multi-select array)", () => {
     phase: "before-contract",
     decisions: { "data-type": ["sensitive"] }
   }, processData);
-  assert.ok(actions.includes("contact-sdp-agent-sensitive"));
+  assert.ok(actions.includes("contact-sdp-agent-elevated"));
 });
 
 test("multi-select array containing sensitive alongside others still triggers escalation", () => {
@@ -25,7 +25,7 @@ test("multi-select array containing sensitive alongside others still triggers es
     phase: "before-contract",
     decisions: { "data-type": ["internal", "personal-non-sensitive", "sensitive"] }
   }, processData);
-  assert.ok(actions.includes("contact-sdp-agent-sensitive"));
+  assert.ok(actions.includes("contact-sdp-agent-elevated"));
 });
 
 test("multi-select array without sensitive does NOT trigger escalation", () => {
@@ -33,7 +33,7 @@ test("multi-select array without sensitive does NOT trigger escalation", () => {
     phase: "before-contract",
     decisions: { "data-type": ["anonymous", "internal"] }
   }, processData);
-  assert.ok(!actions.includes("contact-sdp-agent-sensitive"));
+  assert.ok(!actions.includes("contact-sdp-agent-elevated"));
 });
 
 test("empty multi-select array does NOT trigger escalation", () => {
@@ -41,7 +41,7 @@ test("empty multi-select array does NOT trigger escalation", () => {
     phase: "before-contract",
     decisions: { "data-type": [] }
   }, processData);
-  assert.ok(!actions.includes("contact-sdp-agent-sensitive"));
+  assert.ok(!actions.includes("contact-sdp-agent-elevated"));
 });
 
 test("scalar decision still works (backward compat for non-multi steps)", () => {

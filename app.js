@@ -1,6 +1,7 @@
 import { parseHash, buildHash } from "./lib/router.js";
 import { computeActions } from "./lib/rules.js";
 import { toMarkdown, toPlainText } from "./lib/markdown.js";
+import { suggestCategory, formatClassification } from "./lib/classify.js";
 
 const state = {
   process: null,
@@ -30,6 +31,18 @@ function phaseNumber(phaseId) {
 
 function shortLabel(step) {
   return step.shortLabel || step.question;
+}
+
+function isStepVisible(step, decisions) {
+  if (!step.showIf) return true;
+  const { step: depStep, equals: expectedValue } = step.showIf;
+  const actualValue = decisions[depStep];
+  if (Array.isArray(actualValue)) return actualValue.includes(expectedValue);
+  return actualValue === expectedValue;
+}
+
+function visibleSteps(phase, decisions) {
+  return phase.steps.filter(s => isStepVisible(s, decisions));
 }
 
 // For each action, return human-readable reasons explaining which step+answer triggered it.
@@ -84,7 +97,7 @@ function updateHeader(route) {
   const actionEl = document.getElementById("header-action");
   if (!titleEl || !actionEl) return;
 
-  if ((route.view === "wizard" || route.view === "summary") && route.phase) {
+  if (route.view === "wizard" && route.phase) {
     const phase = state.process.phases.find(p => p.id === route.phase);
     if (phase) {
       const phaseNo = phaseNumber(phase.id);
@@ -99,6 +112,8 @@ function updateHeader(route) {
 
 function renderPhasePicker() {
   const overview = state.process.overviewLink;
+  const externalIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+
   root.innerHTML = `
     <section class="phase-picker">
       <h1>Duckwise SDP process for projects</h1>
@@ -106,13 +121,14 @@ function renderPhasePicker() {
 
       ${overview ? `
         <div class="external-callout">
-          <p>Note: This wizard is a guide. It does not replace the official SDP process overview. You will need to be on Trifork's network or connected via VPN to access the linked pages.</p>
-          <a class="btn cta" href="${escapeHtml(overview.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(overview.label)} ↗</a>
+          <p>This guide does not replace the full SDP process. You will need to be on Trifork's network or connected via VPN to access the linked pages.</p>
+          <a class="btn cta" href="${escapeHtml(overview.href)}" target="_blank" rel="noopener noreferrer">Full SDP process ${externalIcon}</a>
         </div>
       ` : ""}
 
-      <h2 class="picker-heading">Phases</h2>
-      <p class="section-intro">Start by selecting the phase your project is in. Each phase walks you through the decisions for that part of the SDP process. Nothing about your project is stored, only the choices you make in the wizard.</p>
+      <h2 class="picker-heading">Select the relevant phase for your project</h2>
+      <p class="section-intro">Start by selecting the phase your project is in. Each phase walks you through the decisions for that part of the SDP process and summarises an action list for you.</p>
+      <p class="phase-note">All previous phases must be completed before continuing to the next phase.</p>
 
       <ol class="phase-list">
         ${state.process.phases.map((p, i) => {
@@ -123,15 +139,11 @@ function renderPhasePicker() {
               <span class="phase-card-num">${num}</span>
             </div>
             <div class="phase-card-body">
-              <div class="phase-card-head">
-                <h3 class="phase-card-title">${escapeHtml(p.title)}</h3>
-                ${p.responsible ? `<span class="responsible-label">${escapeHtml(p.responsible)}</span>` : ""}
-              </div>
+              ${p.responsible ? `<span class="responsible-label">${escapeHtml(p.responsible)}</span>` : ""}
+              <h3 class="phase-card-title">${escapeHtml(p.title)}</h3>
               <p class="phase-card-desc">${escapeHtml(p.intro)}</p>
-              <div class="phase-card-foot">
-                <span class="phase-card-cta">Start →</span>
-              </div>
             </div>
+            <span class="phase-card-cta">Start</span>
           </a></li>
         `;}).join("")}
       </ol>
@@ -166,18 +178,22 @@ function renderWizard(route) {
   const phase = state.process.phases.find(p => p.id === route.phase);
   if (!phase) { location.hash = "#/"; return; }
 
-  // Pick the active step. If route has no step, use the first one.
-  const stepId = route.step ?? phase.steps[0]?.id;
-  const step = phase.steps.find(s => s.id === stepId);
-  if (!step) { renderSummary({ view: "summary", phase: phase.id }); return; }
+  const visible = visibleSteps(phase, state.decisions);
+  if (visible.length === 0) { renderSummary({ view: "summary", phase: phase.id }); return; }
+
+  // Pick the active step. If route has no step (or refers to a now-hidden one),
+  // use the first visible step.
+  const requestedId = route.step;
+  let step = requestedId ? visible.find(s => s.id === requestedId) : visible[0];
+  if (!step) step = visible[0];
 
   const selected = state.decisions[step.id] ?? (step.type === "multi" ? [] : null);
   const isMulti = step.type === "multi";
   const inputType = isMulti ? "checkbox" : "radio";
   const prev = prevStepHash(phase, step);
 
-  const stepIndex = phase.steps.findIndex(s => s.id === step.id);
-  const totalSteps = phase.steps.length;
+  const stepIndex = visible.findIndex(s => s.id === step.id);
+  const totalSteps = visible.length;
   const progressPct = Math.round(((stepIndex + 1) / totalSteps) * 100);
 
   const nextLabel = isLastStep(phase, step) ? "View summary →" : "Next →";
@@ -188,7 +204,7 @@ function renderWizard(route) {
       <div class="wizard-grid">
         <nav class="step-list" aria-label="Steps in this phase">
           <ol>
-            ${phase.steps.map(s => {
+            ${visible.map(s => {
               const isCurrent = s.id === step.id;
               const answered = isAnswered(state.decisions[s.id]);
               const cls = isCurrent ? "current" : (answered ? "answered" : "future");
@@ -268,19 +284,22 @@ function renderWizard(route) {
 }
 
 function prevStepHash(phase, step) {
-  const i = phase.steps.findIndex(s => s.id === step.id);
+  const visible = visibleSteps(phase, state.decisions);
+  const i = visible.findIndex(s => s.id === step.id);
   if (i <= 0) return null;
-  return buildHash({ view: "wizard", phase: phase.id, step: phase.steps[i - 1].id });
+  return buildHash({ view: "wizard", phase: phase.id, step: visible[i - 1].id });
 }
 
 function nextStepHash(phase, step) {
-  const i = phase.steps.findIndex(s => s.id === step.id);
-  if (i === phase.steps.length - 1) return buildHash({ view: "summary", phase: phase.id });
-  return buildHash({ view: "wizard", phase: phase.id, step: phase.steps[i + 1].id });
+  const visible = visibleSteps(phase, state.decisions);
+  const i = visible.findIndex(s => s.id === step.id);
+  if (i === visible.length - 1) return buildHash({ view: "summary", phase: phase.id });
+  return buildHash({ view: "wizard", phase: phase.id, step: visible[i + 1].id });
 }
 
 function isLastStep(phase, step) {
-  return phase.steps[phase.steps.length - 1].id === step.id;
+  const visible = visibleSteps(phase, state.decisions);
+  return visible[visible.length - 1].id === step.id;
 }
 
 function renderSummary(route) {
@@ -301,8 +320,12 @@ function renderSummary(route) {
   const actionCount = actions.length;
   const destinationCount = groups.size;
 
-  const lastStepId = phase.steps[phase.steps.length - 1].id;
+  const visiblePhaseSteps = visibleSteps(phase, state.decisions);
+  const lastStepId = visiblePhaseSteps[visiblePhaseSteps.length - 1].id;
   const prevHref = buildHash({ view: "wizard", phase: phase.id, step: lastStepId });
+
+  // Suggest a Duckwise project category based on the classification answers.
+  const suggestion = suggestCategory(state.decisions);
 
   // Order destinations so escalations always surface first. Other groups keep
   // the order in which they were first added (Map preserves insertion order).
@@ -318,7 +341,7 @@ function renderSummary(route) {
       <div class="wizard-grid">
         <nav class="step-list" aria-label="Steps in this phase">
           <ol>
-            ${phase.steps.map(s => {
+            ${visibleSteps(phase, state.decisions).map(s => {
               const answered = isAnswered(state.decisions[s.id]);
               const cls = answered ? "answered" : "future";
               return `<li class="${cls}">
@@ -346,6 +369,27 @@ function renderSummary(route) {
 
           ${vpnNote ? `<p class="vpn-note">${escapeHtml(vpnNote)}</p>` : ""}
 
+          ${suggestion ? `
+            <aside class="category-suggestion">
+              <div class="category-suggestion-letter">${escapeHtml(suggestion.letter)}</div>
+              <div class="category-suggestion-body">
+                <p class="category-suggestion-eyebrow">Suggested project category</p>
+                <h2 class="category-suggestion-title">${escapeHtml(suggestion.name)}</h2>
+                <p class="category-suggestion-desc">${escapeHtml(suggestion.description)}</p>
+                ${suggestion.reasons.length ? `
+                  <ul class="category-suggestion-reasons">
+                    ${suggestion.reasons.map(r => `<li>${escapeHtml(r)}</li>`).join("")}
+                  </ul>
+                ` : ""}
+                <p class="category-suggestion-foot">Use this as the starting template and add the project under <strong>Custom project categories</strong> on the Duckwise Project Categories page.</p>
+                <div class="category-suggestion-actions">
+                  <button type="button" id="copy-classification" class="btn ghost">Copy classification details</button>
+                  <span id="copy-classification-feedback" class="copy-feedback" aria-live="polite"></span>
+                </div>
+              </div>
+            </aside>
+          ` : ""}
+
           ${actions.length === 0 ? `<p class="empty">Adjust your answers in the wizard to see what to do next.</p>` : ""}
 
           ${Array.from(orderedGroups.entries()).map(([dest, items]) => {
@@ -360,19 +404,19 @@ function renderSummary(route) {
               <ul class="action-list">
                 ${items.map(a => {
                   const reasons = reasonsForAction(a.id, { phase: phase.id, decisions: state.decisions }, state.process);
+                  const linkIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+                  const showPlaceholder = a.link && a.link.href.startsWith("REPLACE_");
                   return `
                   <li>
                     <label>
                       <input type="checkbox" class="action-check" data-id="${escapeHtml(a.id)}">
                       <div class="action-body">
-                        <div class="action-head">
-                          <span class="action-title">${escapeHtml(a.title)}</span>
-                          ${a.link ? `<a class="action-link" href="${escapeHtml(a.link.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(a.link.label)} ↗</a>` : ""}
-                          ${a.link && a.link.href.startsWith("REPLACE_") ? `<span class="placeholder-badge" title="Replace this URL in process.json">link not configured</span>` : ""}
-                        </div>
+                        <span class="action-title">${escapeHtml(a.title)}</span>
                         ${a.note ? `<p class="action-note">${escapeHtml(a.note)}</p>` : ""}
+                        ${showPlaceholder ? `<p><span class="placeholder-badge" title="Replace this URL in process.json">link not configured</span></p>` : ""}
                         ${reasons.length ? `<p class="action-reason">Because: ${reasons.map(escapeHtml).join("; ")}</p>` : ""}
                       </div>
+                      ${a.link ? `<a class="action-link" href="${escapeHtml(a.link.href)}" target="_blank" rel="noopener noreferrer">external link ${linkIcon}</a>` : ""}
                     </label>
                   </li>
                 `;}).join("")}
@@ -392,7 +436,7 @@ function renderSummary(route) {
     <nav class="wizard-footer" aria-label="Summary navigation">
       <div class="wizard-footer-inner">
         <a class="btn ghost" href="${prevHref}">← Previous</a>
-        <span class="step-counter">All ${phase.steps.length} steps answered</span>
+        <span class="step-counter">All ${visiblePhaseSteps.length} steps answered</span>
         <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" style="width: 100%"></div></div>
         <button type="button" id="finish-btn" class="btn primary" title="Clears all answers and returns you to the phase picker.">Finish ✓</button>
       </div>
@@ -405,6 +449,21 @@ function renderSummary(route) {
 
   document.getElementById("copy-md").addEventListener("click", () => copy(toMarkdown(actions, phase), "md"));
   document.getElementById("copy-txt").addEventListener("click", () => copy(toPlainText(actions, phase), "txt"));
+
+  const copyClassificationBtn = document.getElementById("copy-classification");
+  if (copyClassificationBtn) {
+    copyClassificationBtn.addEventListener("click", async () => {
+      const text = formatClassification(state.decisions, state.process, suggestion);
+      const feedback = document.getElementById("copy-classification-feedback");
+      try {
+        await navigator.clipboard.writeText(text);
+        feedback.textContent = "Copied.";
+      } catch (err) {
+        feedback.textContent = "Copy failed.";
+      }
+      setTimeout(() => { feedback.textContent = ""; }, 2500);
+    });
+  }
   document.getElementById("finish-btn").addEventListener("click", () => {
     const flash = document.getElementById("done-flash");
     flash.classList.add("visible");

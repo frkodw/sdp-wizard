@@ -218,7 +218,26 @@ main p,
   flex-direction: column;
   gap: 0.55rem;
 }
-.phase-card-body .responsible-label { align-self: flex-start; margin: 0 0 0.1rem; }
+.phase-card-body .phase-card-meta { align-self: flex-start; margin: 0 0 0.1rem; }
+.phase-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.recurring-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--blue-soft);
+  color: var(--fg);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.18rem 0.55rem 0.18rem 0.45rem;
+  border-radius: 999px;
+  letter-spacing: 0.01em;
+}
+.recurring-tag-icon { flex-shrink: 0; display: block; }
 .phase-card-title {
   font-family: var(--font-serif);
   font-size: 1.4rem;
@@ -357,6 +376,22 @@ main p,
   color: var(--fg);
   font-size: 1rem;
 }
+.context-text:has(+ .question-link) { margin-bottom: 0.5rem; }
+.question-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 2rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line-strong);
+  padding-bottom: 1px;
+  transition: color 100ms ease, border-color 100ms ease;
+}
+.question-link:hover { color: var(--orange); border-color: var(--orange); }
+.question-link svg { display: block; flex-shrink: 0; }
 .question-hint {
   margin: -0.25rem 0 1.5rem;
   color: var(--muted);
@@ -412,9 +447,10 @@ main p,
 .wizard-footer .btn.ghost { border-color: var(--line-strong); }
 .wizard-footer .nav-spacer { min-width: 7.5rem; }
 
-/* When the wizard or summary view is active, hide the site footer (the sticky
-   wizard footer takes its place) and pad the main content so it isn't hidden
-   under it. */
+/* The site footer only appears on the explainer view. The phase picker is a
+   landing page kept clean, and the wizard/summary views have the sticky
+   wizard footer taking the footer's place. */
+body.view-phase-picker .site-footer,
 body.view-wizard .site-footer,
 body.view-summary .site-footer { display: none; }
 body.view-wizard main,
@@ -494,6 +530,34 @@ fieldset { border: 0; padding: 0; margin: 0; }
   font-weight: 600;
 }
 .btn.finish:hover { opacity: 0.9; }
+
+/* "Article 30 needs an update" CTA — appears on phase 3/4 summaries when the
+   restart-process action is triggered. Either as a hero (when it's the only
+   thing on the page) or as an inset banner above the regular checklist. */
+.restart-cta { display: inline-flex; align-items: center; padding: 0.75rem 1.4rem; border-radius: 999px; font-weight: 600; }
+.restart-banner {
+  background: var(--blue-soft);
+  border: 1px solid var(--blue-soft-border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin: 1rem 0 2rem;
+}
+.restart-banner-title {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 0.4rem;
+  color: var(--fg);
+  max-width: none;
+}
+.restart-banner-body { margin: 0 0 1rem; color: var(--fg); }
+.restart-banner .btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
 
 /* Suggested project category block (summary view) */
 .category-suggestion {
@@ -580,8 +644,6 @@ fieldset { border: 0; padding: 0; margin: 0; }
   border-radius: 999px;
   letter-spacing: 0.01em;
 }
-.phase-card .responsible-label { margin-top: 0.8rem; }
-.responsible-line { margin: 0.25rem 0 0.75rem; }
 
 /* ============ summary ============ */
 .action-count {
@@ -651,8 +713,8 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .action-list li:hover { border-color: var(--line-strong); }
 .action-list label {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
+  grid-template-columns: auto 1fr;
+  align-items: start;
   gap: 1rem;
   cursor: pointer;
 }
@@ -660,7 +722,7 @@ fieldset { border: 0; padding: 0; margin: 0; }
   flex-shrink: 0;
   width: 1.15rem;
   height: 1.15rem;
-  margin: 0;
+  margin: 0.2rem 0 0;
   cursor: pointer;
   accent-color: var(--accent);
 }
@@ -670,27 +732,28 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .action-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #fff;
-  background: var(--orange);
-  padding: 0.6rem 1.1rem;
-  border-radius: 6px;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--accent);
   text-decoration: none;
-  white-space: nowrap;
+  border-bottom: 1px solid var(--line-strong);
+  padding-bottom: 1px;
+  transition: color 100ms ease, border-color 100ms ease;
 }
-.action-link:hover { background: var(--orange-hover); }
-.action-link svg { display: block; }
+.action-link:hover { color: var(--orange); border-color: var(--orange); }
+.action-link svg { display: block; flex-shrink: 0; }
 .action-note {
   color: var(--muted);
   margin: 0.25rem 0 0;
   font-size: 0.92rem;
 }
 .action-reason {
-  display: inline-block;
+  display: block;
+  width: fit-content;
   color: var(--muted-soft);
-  margin: 0.5rem 0 0;
+  margin: 0.75rem 0 0;
   font-size: 0.78rem;
   background: var(--surface-soft);
   padding: 0.15rem 0.55rem;
@@ -705,10 +768,6 @@ fieldset { border: 0; padding: 0; margin: 0; }
   white-space: nowrap;
 }
 
-@media (max-width: 720px) {
-  .action-list label { grid-template-columns: auto 1fr; }
-  .action-link { grid-column: 1 / -1; justify-self: start; margin-top: 0.5rem; }
-}
 
 .actions-row {
   display: flex;

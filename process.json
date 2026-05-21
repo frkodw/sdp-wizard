@@ -125,6 +125,7 @@
           "shortLabel": "Team signoff",
           "question": "Have all team members signed the annual cycle signoff?",
           "context": "Section 3 \"Team member signoff\" on the DK-AAR/CPH-DUCKS Annual cycle BU page must be signed by every team member before they touch the project.",
+          "link": { "label": "Team member signoff", "href": "https://docs.trifork.com/display/TSDP/Team+member+signoff" },
           "type": "yesno",
           "options": [
             { "value": "yes", "label": "Yes" },
@@ -136,6 +137,7 @@
           "shortLabel": "Tools listed",
           "question": "Are all tools the team will use listed on the Duckwise systems Level 1/2/3 lists?",
           "context": "Each system must be on the correct level, with the level of data processing allowed matching the project's tasks. Client-provided accounts (non-duckwise.dk/trifork.com emails) go on Level 3.",
+          "link": { "label": "Duckwise systems", "href": "https://docs.trifork.com/display/TSDP/DK-AAR-DUCKS%2C+DK-AAL-DUCKS+and+DK-CPH-DUCKS%3A+Duckwise+systems" },
           "type": "yesno",
           "options": [
             { "value": "yes", "label": "Yes" },
@@ -146,7 +148,8 @@
           "id": "handbooks-read",
           "shortLabel": "Handbooks read",
           "question": "Have all team members read the handbooks for the tools being used?",
-          "context": "If any handbook is listed for a system, every team member must read and understand it before using the system.",
+          "context": "Only some tools have an employee handbook. Where one is listed on the Duckwise systems page, every team member must read and understand it before using that tool.",
+          "link": { "label": "Duckwise systems", "href": "https://docs.trifork.com/display/TSDP/DK-AAR-DUCKS%2C+DK-AAL-DUCKS+and+DK-CPH-DUCKS%3A+Duckwise+systems" },
           "type": "yesno",
           "options": [
             { "value": "yes", "label": "Yes" },
@@ -170,6 +173,7 @@
       "id": "during-project",
       "title": "During the project",
       "responsible": "Project Lead",
+      "recurring": true,
       "intro": "Once a month, check whether anything has changed that would require updating Article 30.",
       "steps": [
         {
@@ -228,10 +232,9 @@
     { "id": "list-tools-on-levels", "title": "Add or update each tool on the correct Duckwise systems level (1/2/3)", "destination": "Duckwise systems", "link": { "label": "Duckwise systems", "href": "https://docs.trifork.com/display/TSDP/DK-AAR-DUCKS%2C+DK-AAL-DUCKS+and+DK-CPH-DUCKS%3A+Duckwise+systems" }, "note": "Match the level of data processing allowed to the project's tasks." },
     { "id": "read-system-handbooks", "title": "Read the handbooks for every system the team will use", "destination": "Team prep", "link": null, "note": "If a system has a handbook listed, every team member must read it before use." },
     { "id": "list-client-accounts-level-3", "title": "List any client-licensed accounts on the Duckwise systems Level 3 list", "destination": "Duckwise systems", "link": { "label": "Duckwise systems", "href": "https://docs.trifork.com/display/TSDP/DK-AAR-DUCKS%2C+DK-AAL-DUCKS+and+DK-CPH-DUCKS%3A+Duckwise+systems" }, "note": "Accounts not using duckwise.dk or trifork.com emails belong on Level 3." },
-    { "id": "draft-consent", "title": "Draft the consent form. Use the client's template if they have one, otherwise the Trifork Consent template.", "destination": "Consents", "link": { "label": "Consent template", "href": "https://docs.trifork.com/display/TSDP/Consent+template" }, "note": "Run the consent validity checklist (clear language, specific purpose, data described, processing described, controller/processor/sub-processors named, systems and locations described, rights described, checkbox driven)." },
+    { "id": "draft-consent", "title": "Draft the consent form", "destination": "Consents", "link": { "label": "Consent template", "href": "https://docs.trifork.com/display/TSDP/Consent+template" }, "note": "Use the client's template if they have one, otherwise the Trifork Consent template. Run the consent validity checklist (clear language, specific purpose, data described, processing described, controller/processor/sub-processors named, systems and locations described, rights described, checkbox driven)." },
     { "id": "client-approves-consent", "title": "Get written client approval of the consent form", "destination": "Consents", "link": null, "note": "Client appears as data controller and sender, and takes responsibility for storing consent documentation. If the client refuses this, contact the SDP agent." },
-    { "id": "restart-process", "title": "Restart the SDP process from the beginning and update Article 30", "destination": "Article 30", "link": null, "note": "Material change detected. Re-run the wizard from \"Before contract signing\"." },
-    { "id": "no-action", "title": "No action required this cycle", "destination": "Notes", "link": null, "note": "Re-check next month or at project finish." },
+    { "id": "restart-process", "title": "Complete Phase 2 to update Article 30", "destination": "Article 30", "link": null, "note": "Material change detected. Walk through Phase 2 (Before project start) again to refresh classifications, tool levels, and signoffs." },
     { "id": "close-article-30", "title": "Update Article 30 and mark the project completed", "destination": "Article 30", "link": { "label": "Duckwise Article 30", "href": "https://docs.trifork.com/display/TSDP/Duckwise+Article+30" }, "note": "Final close out. Confirm the row is current and mark complete." },
     { "id": "verify-deletion", "title": "Verify that data slated for deletion has actually been deleted", "destination": "Closeout", "link": null, "note": "Cross-check against consents and DPAs to confirm deletion obligations are met." },
     { "id": "complete-deletion", "title": "Complete the outstanding deletions before closing the project", "destination": "Closeout", "link": null, "note": "Deletions defined by consents and DPAs must be done before marking the project complete." }
@@ -253,7 +256,6 @@
     { "if": { "step": "handbooks-read", "equals": "no" }, "then": ["read-system-handbooks"] },
     { "if": { "step": "consents-needed", "equals": "yes" }, "then": ["draft-consent", "client-approves-consent"] },
     { "if": { "step": "changes-affect-article-30", "equals": "yes" }, "then": ["restart-process"] },
-    { "if": { "step": "changes-affect-article-30", "equals": "no" }, "then": ["no-action"] },
     { "if": { "step": "finish-changes", "equals": "yes" }, "then": ["restart-process"] },
     { "if": { "step": "finish-changes", "equals": "no" }, "then": ["close-article-30"] },
     { "if": { "step": "deletion-done", "equals": "yes" }, "then": ["verify-deletion"] },

@@ -65,7 +65,7 @@ function reasonsForAction(actionId, state_, processData) {
     if (!matches) continue;
     const option = step.options.find(o => o.value === rule.if.equals);
     const optionLabel = option ? option.label : rule.if.equals;
-    reasons.push(`${shortLabel(step)}: ${optionLabel}`);
+    reasons.push(`${shortLabel(step)} → ${optionLabel}`);
   }
   return reasons;
 }
@@ -139,7 +139,12 @@ function renderPhasePicker() {
               <span class="phase-card-num">${num}</span>
             </div>
             <div class="phase-card-body">
-              ${p.responsible ? `<span class="responsible-label">${escapeHtml(p.responsible)}</span>` : ""}
+              ${(p.responsible || p.recurring) ? `
+                <div class="phase-card-meta">
+                  ${p.responsible ? `<span class="responsible-label">${escapeHtml(p.responsible)}</span>` : ""}
+                  ${p.recurring ? `<span class="recurring-tag"><img class="recurring-tag-icon" src="assets/Repeat.svg" alt="" width="14" height="14">Recurring</span>` : ""}
+                </div>
+              ` : ""}
               <h3 class="phase-card-title">${escapeHtml(p.title)}</h3>
               <p class="phase-card-desc">${escapeHtml(p.intro)}</p>
             </div>
@@ -228,6 +233,7 @@ function renderWizard(route) {
 <article class="question">
         <h2>${escapeHtml(step.question)}</h2>
         <p class="context-text">${escapeHtml(step.context)}</p>
+        ${step.link ? `<a class="question-link" href="${escapeHtml(step.link.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(step.link.label)} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>` : ""}
         ${isMulti ? `<p class="question-hint">Tick every option that applies.</p>` : ""}
 
         <form id="decision-form">
@@ -314,11 +320,17 @@ function renderSummary(route) {
     .map(id => state.process.actions.find(a => a.id === id))
     .filter(Boolean);
 
-  const groups = groupBy(actions, "destination");
   const vpnNote = state.process.vpnNote;
-
   const actionCount = actions.length;
-  const destinationCount = groups.size;
+
+  // The `restart-process` action redirects the user back to Phase 2 rather than
+  // being a tickable checklist item. Pull it out and render it as a banner CTA
+  // separately from the regular checklist.
+  const restartAction = actions.find(a => a.id === "restart-process");
+  const checklistActions = actions.filter(a => a.id !== "restart-process");
+  const checklistGroups = groupBy(checklistActions, "destination");
+  const checklistCount = checklistActions.length;
+  const checklistDestinationCount = checklistGroups.size;
 
   const visiblePhaseSteps = visibleSteps(phase, state.decisions);
   const lastStepId = visiblePhaseSteps[visiblePhaseSteps.length - 1].id;
@@ -331,10 +343,25 @@ function renderSummary(route) {
   // the order in which they were first added (Map preserves insertion order).
   const escalationKey = "Escalation";
   const orderedGroups = new Map();
-  if (groups.has(escalationKey)) orderedGroups.set(escalationKey, groups.get(escalationKey));
-  for (const [k, v] of groups) {
+  if (checklistGroups.has(escalationKey)) orderedGroups.set(escalationKey, checklistGroups.get(escalationKey));
+  for (const [k, v] of checklistGroups) {
     if (k !== escalationKey) orderedGroups.set(k, v);
   }
+
+  const phase2Hash = buildHash({ view: "wizard", phase: "before-project-start" });
+  const restartBody = restartAction ? restartAction.note : "Material change detected. Walk through Phase 2 (Before project start) again to refresh classifications, tool levels, and signoffs.";
+  const restartHero = `
+    <h1>Article 30 needs an update</h1>
+    <p class="subtitle">${escapeHtml(restartBody)}</p>
+    <p><a class="btn primary restart-cta" href="${phase2Hash}">Go to Phase 2 →</a></p>
+  `;
+  const restartBannerAside = `
+    <aside class="restart-banner">
+      <h2 class="restart-banner-title">Article 30 needs an update</h2>
+      <p class="restart-banner-body">${escapeHtml(restartBody)}</p>
+      <a class="btn primary" href="${phase2Hash}">Go to Phase 2 →</a>
+    </aside>
+  `;
 
   root.innerHTML = `
     <section class="summary">
@@ -361,13 +388,21 @@ function renderSummary(route) {
         </nav>
 
         <div class="wizard-main">
-          <h1>Your action checklist</h1>
           ${actionCount === 0
-            ? `<p class="subtitle">No actions to take based on your answers.</p>`
-            : `<p class="action-count"><strong>${actionCount}</strong> ${actionCount === 1 ? "item" : "items"} across <strong>${destinationCount}</strong> ${destinationCount === 1 ? "destination" : "destinations"}.</p>
-               <p class="subtitle">Tick items as you go, then copy the list into your Confluence project page.</p>`}
+            ? phase.id === "during-project"
+              ? `<h1>All clear this cycle</h1>
+                 <p class="subtitle">Nothing has changed that affects Article 30 this month. Re-check next month or at project finish.</p>`
+              : `<h1>Your action checklist</h1>
+                 <p class="subtitle">No actions to take based on your answers.</p>`
+            : restartAction && checklistCount === 0
+              ? restartHero
+              : `<h1>Your action checklist</h1>
+                 <p class="action-count"><strong>${checklistCount}</strong> ${checklistCount === 1 ? "item" : "items"} across <strong>${checklistDestinationCount}</strong> ${checklistDestinationCount === 1 ? "destination" : "destinations"}.</p>
+                 <p class="subtitle">Tick items as you go, or copy the list into your project page if you want to finish actions later. Nothing is stored after exiting this site.</p>`}
 
-          ${vpnNote ? `<p class="vpn-note">${escapeHtml(vpnNote)}</p>` : ""}
+          ${restartAction && checklistCount > 0 ? restartBannerAside : ""}
+
+          ${checklistCount > 0 && vpnNote ? `<p class="vpn-note">${escapeHtml(vpnNote)}</p>` : ""}
 
           ${suggestion ? `
             <aside class="category-suggestion">
@@ -390,8 +425,6 @@ function renderSummary(route) {
             </aside>
           ` : ""}
 
-          ${actions.length === 0 ? `<p class="empty">Adjust your answers in the wizard to see what to do next.</p>` : ""}
-
           ${Array.from(orderedGroups.entries()).map(([dest, items]) => {
             const isEscalation = dest === escalationKey;
             return `
@@ -413,10 +446,10 @@ function renderSummary(route) {
                       <div class="action-body">
                         <span class="action-title">${escapeHtml(a.title)}</span>
                         ${a.note ? `<p class="action-note">${escapeHtml(a.note)}</p>` : ""}
+                        ${a.link ? `<a class="action-link" href="${escapeHtml(a.link.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(a.link.label)} ${linkIcon}</a>` : ""}
                         ${showPlaceholder ? `<p><span class="placeholder-badge" title="Replace this URL in process.json">link not configured</span></p>` : ""}
-                        ${reasons.length ? `<p class="action-reason">Because: ${reasons.map(escapeHtml).join("; ")}</p>` : ""}
+                        ${reasons.length ? `<p class="action-reason">Because: ${reasons.map(escapeHtml).join(", ")}</p>` : ""}
                       </div>
-                      ${a.link ? `<a class="action-link" href="${escapeHtml(a.link.href)}" target="_blank" rel="noopener noreferrer">external link ${linkIcon}</a>` : ""}
                     </label>
                   </li>
                 `;}).join("")}
@@ -424,11 +457,13 @@ function renderSummary(route) {
             </section>
           `;}).join("")}
 
-          <div class="actions-row">
-            <button id="copy-md" class="btn ghost">Copy as Markdown</button>
-            <button id="copy-txt" class="btn ghost">Copy as plain text</button>
-            <span id="copy-feedback" class="copy-feedback" aria-live="polite"></span>
-          </div>
+          ${checklistCount > 0 ? `
+            <div class="actions-row">
+              <button id="copy-md" class="btn ghost">Copy as Markdown</button>
+              <button id="copy-txt" class="btn ghost">Copy as plain text</button>
+              <span id="copy-feedback" class="copy-feedback" aria-live="polite"></span>
+            </div>
+          ` : ""}
         </div>
       </div>
     </section>
@@ -438,7 +473,7 @@ function renderSummary(route) {
         <a class="btn ghost" href="${prevHref}">← Previous</a>
         <span class="step-counter">All ${visiblePhaseSteps.length} steps answered</span>
         <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" style="width: 100%"></div></div>
-        <button type="button" id="finish-btn" class="btn primary" title="Clears all answers and returns you to the phase picker.">Finish ✓</button>
+        <button type="button" id="finish-btn" class="btn primary" title="Clears all answers and returns you to the phase picker.">Finish Phase ${phaseNumber(phase.id)}</button>
       </div>
     </nav>
 
@@ -447,8 +482,10 @@ function renderSummary(route) {
     </div>
   `;
 
-  document.getElementById("copy-md").addEventListener("click", () => copy(toMarkdown(actions, phase), "md"));
-  document.getElementById("copy-txt").addEventListener("click", () => copy(toPlainText(actions, phase), "txt"));
+  const copyMdBtn = document.getElementById("copy-md");
+  const copyTxtBtn = document.getElementById("copy-txt");
+  if (copyMdBtn) copyMdBtn.addEventListener("click", () => copy(toMarkdown(checklistActions, phase), "md"));
+  if (copyTxtBtn) copyTxtBtn.addEventListener("click", () => copy(toPlainText(checklistActions, phase), "txt"));
 
   const copyClassificationBtn = document.getElementById("copy-classification");
   if (copyClassificationBtn) {

@@ -296,7 +296,7 @@ main p,
     gap: 1.25rem;
   }
   .external-callout p { flex: 1; }
-  .external-callout .btn.cta { flex-shrink: 0; }
+  .external-callout .btn.cta { flex-shrink: 0; margin-left: auto; }
 }
 
 /* ============ explainer ============ */
@@ -384,13 +384,13 @@ main p,
   margin: 0 0 2rem;
   font-size: 0.92rem;
   font-weight: 500;
-  color: var(--accent);
+  color: var(--orange);
   text-decoration: none;
-  border-bottom: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--orange-soft-border);
   padding-bottom: 1px;
   transition: color 100ms ease, border-color 100ms ease;
 }
-.question-link:hover { color: var(--orange); border-color: var(--orange); }
+.question-link:hover { color: var(--orange-hover); border-color: var(--orange-hover); }
 .question-link svg { display: block; flex-shrink: 0; }
 .question-hint {
   margin: -0.25rem 0 1.5rem;
@@ -736,13 +736,13 @@ fieldset { border: 0; padding: 0; margin: 0; }
   margin-top: 0.5rem;
   font-size: 0.92rem;
   font-weight: 500;
-  color: var(--accent);
+  color: var(--orange);
   text-decoration: none;
-  border-bottom: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--orange-soft-border);
   padding-bottom: 1px;
   transition: color 100ms ease, border-color 100ms ease;
 }
-.action-link:hover { color: var(--orange); border-color: var(--orange); }
+.action-link:hover { color: var(--orange-hover); border-color: var(--orange-hover); }
 .action-link svg { display: block; flex-shrink: 0; }
 .action-note {
   color: var(--muted);
@@ -789,9 +789,10 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .summary .vpn-note {
   background: var(--orange-soft);
   border: 1px solid var(--orange-soft-border);
-  border-radius: 8px;
-  padding: 0.7rem 0.95rem;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
   margin: 1rem 0 1.5rem;
+  max-width: none;
   color: var(--fg);
 }
 

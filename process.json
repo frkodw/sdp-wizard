@@ -148,6 +148,7 @@
           "id": "handbooks-read",
           "shortLabel": "Handbooks read",
           "question": "Have all team members read the handbooks for the tools being used?",
+          "callout": "Links to individual system handbooks are found on the Duckwise Systems Level 1 and 2 lists.",
           "context": "Only some tools have an employee handbook. Where one is listed on the Duckwise systems page, every team member must read and understand it before using that tool.",
           "link": { "label": "Duckwise systems", "href": "https://docs.trifork.com/display/TSDP/DK-AAR-DUCKS%2C+DK-AAL-DUCKS+and+DK-CPH-DUCKS%3A+Duckwise+systems" },
           "type": "yesno",
@@ -175,19 +176,7 @@
       "responsible": "Project Lead",
       "recurring": true,
       "intro": "Once a month, check whether anything has changed that would require updating Article 30.",
-      "steps": [
-        {
-          "id": "changes-affect-article-30",
-          "shortLabel": "Article 30 changes",
-          "question": "Has anything changed this month that affects Article 30?",
-          "context": "New tools, new data types, new sub-processors, or scope changes can require amending Article 30.",
-          "type": "yesno",
-          "options": [
-            { "value": "yes", "label": "Yes" },
-            { "value": "no", "label": "No" }
-          ]
-        }
-      ]
+      "steps": []
     },
     {
       "id": "at-project-finish",
@@ -200,6 +189,13 @@
           "shortLabel": "End-of-project changes",
           "question": "Did anything change at project end that affects Article 30?",
           "context": "Final scope or data movement may require a last amendment before marking the project completed.",
+          "examples": [
+            "New tools or systems added to the project",
+            "New types of personal data being processed",
+            "New sub-processors involved",
+            "Scope changes affecting how personal data is handled"
+          ],
+          "link": { "label": "Duckwise Article 30", "href": "https://docs.trifork.com/display/TSDP/Duckwise+Article+30" },
           "type": "yesno",
           "options": [
             { "value": "yes", "label": "Yes" },
@@ -255,7 +251,6 @@
     { "if": { "step": "tools-listed", "equals": "no" }, "then": ["list-tools-on-levels", "list-client-accounts-level-3"] },
     { "if": { "step": "handbooks-read", "equals": "no" }, "then": ["read-system-handbooks"] },
     { "if": { "step": "consents-needed", "equals": "yes" }, "then": ["draft-consent", "client-approves-consent"] },
-    { "if": { "step": "changes-affect-article-30", "equals": "yes" }, "then": ["restart-process"] },
     { "if": { "step": "finish-changes", "equals": "yes" }, "then": ["restart-process"] },
     { "if": { "step": "finish-changes", "equals": "no" }, "then": ["close-article-30"] },
     { "if": { "step": "deletion-done", "equals": "yes" }, "then": ["verify-deletion"] },

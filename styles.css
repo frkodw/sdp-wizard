@@ -371,6 +371,15 @@ main p,
   margin-bottom: 0.5rem;
   font-size: 1.5rem;
 }
+.question-callout {
+  background: var(--orange-soft);
+  border: 1px solid var(--orange-soft-border);
+  border-radius: 12px;
+  padding: 0.9rem 1.25rem;
+  margin: 0 0 1.5rem;
+  color: var(--fg);
+  font-size: 0.95rem;
+}
 .context-text {
   margin: 0 0 2rem;
   color: var(--fg);
@@ -530,6 +539,36 @@ fieldset { border: 0; padding: 0; margin: 0; }
   font-weight: 600;
 }
 .btn.finish:hover { opacity: 0.9; }
+
+/* Phase 3 "Keeping Article 30 current" info view — Phase 3 has no questions;
+   it just explains when an update is needed and offers a Phase 2 shortcut. */
+.phase-info .wizard-main { max-width: 760px; }
+
+/* Blue "Examples" callout — used on the Phase 3 info view and on Phase 4 step
+   1, surfacing the same list of material-change examples. */
+.phase-info-examples {
+  background: var(--blue-soft);
+  border: 1px solid var(--blue-soft-border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin: 0 0 1.5rem;
+  color: var(--fg);
+  max-width: var(--text-w);
+}
+.phase-info-examples-eyebrow {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.phase-info-examples ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.4rem 0 0;
+}
+.phase-info-examples li { margin: 0.3rem 0; }
 
 /* "Article 30 needs an update" CTA — appears on phase 3/4 summaries when the
    restart-process action is triggered. Either as a hero (when it's the only

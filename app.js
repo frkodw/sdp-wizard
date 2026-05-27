@@ -232,7 +232,16 @@ function renderWizard(route) {
         <div class="wizard-main">
 <article class="question">
         <h2>${escapeHtml(step.question)}</h2>
+        ${step.callout ? `<aside class="question-callout">${escapeHtml(step.callout)}</aside>` : ""}
         <p class="context-text">${escapeHtml(step.context)}</p>
+        ${Array.isArray(step.examples) && step.examples.length ? `
+          <aside class="phase-info-examples">
+            <p class="phase-info-examples-eyebrow">Examples</p>
+            <ul>
+              ${step.examples.map(e => `<li>${escapeHtml(e)}</li>`).join("")}
+            </ul>
+          </aside>
+        ` : ""}
         ${step.link ? `<a class="question-link" href="${escapeHtml(step.link.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(step.link.label)} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>` : ""}
         ${isMulti ? `<p class="question-hint">Tick every option that applies.</p>` : ""}
 
@@ -308,9 +317,61 @@ function isLastStep(phase, step) {
   return visible[visible.length - 1].id === step.id;
 }
 
+function renderDuringProjectInfo(phase) {
+  const phase2Hash = buildHash({ view: "wizard", phase: "before-project-start" });
+  root.innerHTML = `
+    <section class="summary phase-info">
+      <div class="wizard-main">
+        <h1>Keeping Article 30 current</h1>
+        <p class="subtitle">While the project is running, check at least once a month whether anything has changed that affects Article 30.</p>
+        <p>If something material has changed, complete Phase 2 again to update Article 30.</p>
+        <aside class="phase-info-examples">
+          <p class="phase-info-examples-eyebrow">Examples</p>
+          <ul>
+            <li>New tools or systems added to the project</li>
+            <li>New types of personal data being processed</li>
+            <li>New sub-processors involved</li>
+            <li>Scope changes affecting how personal data is handled</li>
+          </ul>
+        </aside>
+        <p><a class="action-link" href="https://docs.trifork.com/display/TSDP/Duckwise+Article+30" target="_blank" rel="noopener noreferrer">Duckwise Article 30 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></p>
+        <p><a class="btn primary restart-cta" href="${phase2Hash}">Go to Phase 2 →</a></p>
+      </div>
+    </section>
+
+    <nav class="wizard-footer" aria-label="Phase navigation">
+      <div class="wizard-footer-inner">
+        <span class="nav-spacer"></span>
+        <span class="step-counter"></span>
+        <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" style="width: 100%"></div></div>
+        <button type="button" id="finish-btn" class="btn primary" title="Returns you to the phase picker.">Finish Phase ${phaseNumber(phase.id)}</button>
+      </div>
+    </nav>
+
+    <div id="done-flash" class="done-flash" aria-hidden="true">
+      <div class="done-flash-card">Done. See you next time.</div>
+    </div>
+  `;
+
+  document.getElementById("finish-btn").addEventListener("click", () => {
+    const flash = document.getElementById("done-flash");
+    flash.classList.add("visible");
+    flash.setAttribute("aria-hidden", "false");
+    setTimeout(() => {
+      resetDecisions();
+      location.hash = "#/";
+    }, 850);
+  });
+}
+
 function renderSummary(route) {
   const phase = state.process.phases.find(p => p.id === route.phase);
   if (!phase) { location.hash = "#/"; return; }
+
+  if (phase.id === "during-project") {
+    renderDuringProjectInfo(phase);
+    return;
+  }
 
   const actionIds = computeActions(
     { phase: phase.id, decisions: state.decisions },

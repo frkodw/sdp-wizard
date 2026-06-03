@@ -1,7 +1,7 @@
 {
   "overviewLink": {
     "label": "SDP process overview",
-    "href": "https://docs.trifork.com/pages/resumedraft.action?draftId=51195398&draftShareId=550ea4f9-5dfc-46fa-ab4a-cf9f6e7f5cb2&"
+    "href": "https://docs.trifork.com/display/TSDP/Duckwise+SDP+Overview"
   },
   "vpnNote": "You will need to be on Trifork's network or connected via VPN to access the linked pages.",
 
@@ -195,7 +195,7 @@
             "New sub-processors involved",
             "Scope changes affecting how personal data is handled"
           ],
-          "link": { "label": "Duckwise Article 30", "href": "https://docs.trifork.com/display/TSDP/Duckwise+Article+30" },
+          "link": { "label": "Duckwise Article 30", "href": "https://docs.trifork.com/pages/viewpage.action?pageId=51195397" },
           "type": "yesno",
           "options": [
             { "value": "yes", "label": "Yes" },
@@ -218,7 +218,7 @@
   ],
 
   "actions": [
-    { "id": "start-article-30-row", "title": "Start a new row in Article 30", "destination": "Article 30", "link": { "label": "Duckwise Article 30", "href": "https://docs.trifork.com/display/TSDP/Duckwise+Article+30" }, "note": "Open the Article 30 register and add a new row for this project. Fill in the columns up to project classification. Use the Copy classification details button above to paste the answers into the \"Which type of data is/will be processed?\" column." },
+    { "id": "start-article-30-row", "title": "Start a new row in Article 30", "destination": "Article 30", "link": { "label": "Duckwise Article 30", "href": "https://docs.trifork.com/pages/viewpage.action?pageId=51195397" }, "note": "Open the Article 30 register and add a new row for this project. Fill in the columns up to project classification. Use the Copy classification details button above to paste the answers into the \"Which type of data is/will be processed?\" column." },
     { "id": "contact-sdp-agent-elevated", "title": "Contact your SDP agent before proceeding. The project has elevated-risk indicators.", "destination": "Escalation", "link": null, "note": "Any of these triggers SDP-agent involvement before contract signing: sensitive personal data, NDA / business secrets, security-cleared personnel, society-critical sector, absolute integrity requirement, or sub-1-day availability." },
     { "id": "fill-ai-tools-agreement", "title": "Have the client sign the Aftale om brug af hjælpeværktøjer (Helper tools agreement)", "destination": "Agreements", "link": { "label": "Aftale om brug af hjælpeværktøjer", "href": "https://docs.trifork.com/pages/viewpage.action?pageId=225582317" }, "note": "Fill in the tools list, get client signature, upload to Article 30." },
     { "id": "create-dpa", "title": "Create the Data Processor Agreement using the DBA Trifork template", "destination": "DPA", "link": { "label": "Data Processing Agreement", "href": "https://docs.trifork.com/display/TSDP/Date+Processing+Agreement" }, "note": "Make sure the relationship between controller, processor, and any sub-processors is described, including which systems Duckwise uses and whether they process data outside the EU or outside the US data privacy framework." },
@@ -231,7 +231,7 @@
     { "id": "draft-consent", "title": "Draft the consent form", "destination": "Consents", "link": { "label": "Consent template", "href": "https://docs.trifork.com/display/TSDP/Consent+template" }, "note": "Use the client's template if they have one, otherwise the Trifork Consent template. Run the consent validity checklist (clear language, specific purpose, data described, processing described, controller/processor/sub-processors named, systems and locations described, rights described, checkbox driven)." },
     { "id": "client-approves-consent", "title": "Get written client approval of the consent form", "destination": "Consents", "link": null, "note": "Client appears as data controller and sender, and takes responsibility for storing consent documentation. If the client refuses this, contact the SDP agent." },
     { "id": "restart-process", "title": "Complete Phase 2 to update Article 30", "destination": "Article 30", "link": null, "note": "Material change detected. Walk through Phase 2 (Before project start) again to refresh classifications, tool levels, and signoffs." },
-    { "id": "close-article-30", "title": "Update Article 30 and mark the project completed", "destination": "Article 30", "link": { "label": "Duckwise Article 30", "href": "https://docs.trifork.com/display/TSDP/Duckwise+Article+30" }, "note": "Final close out. Confirm the row is current and mark complete." },
+    { "id": "close-article-30", "title": "Update Article 30 and mark the project completed", "destination": "Article 30", "link": { "label": "Duckwise Article 30", "href": "https://docs.trifork.com/pages/viewpage.action?pageId=51195397" }, "note": "Final close out. Confirm the row is current and mark complete." },
     { "id": "verify-deletion", "title": "Verify that data slated for deletion has actually been deleted", "destination": "Closeout", "link": null, "note": "Cross-check against consents and DPAs to confirm deletion obligations are met." },
     { "id": "complete-deletion", "title": "Complete the outstanding deletions before closing the project", "destination": "Closeout", "link": null, "note": "Deletions defined by consents and DPAs must be done before marking the project complete." }
   ],
